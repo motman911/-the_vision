@@ -1,0 +1,95 @@
+name: the_vision
+description: تطبيق مكتب الرؤية للدراسة في رواندا
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mailer: ^6.2.5
+  file_picker: ^10.3.7
+  image_picker: ^0.8.7
+  provider: ^6.1.1
+  photo_view: ^0.15.0
+  url_launcher: ^6.3.2
+  font_awesome_flutter: ^10.12.0
+  smooth_page_indicator: ^2.0.1
+  shared_preferences: ^2.1.1
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  flutter_image_compress: ^2.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo_P1.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icons/
+    - assets/images/logo_P1.png
+    - assets/images/logo_P2.png
+    - assets/images/logo_P3.png
+    - assets/images/The_Vision_P1.jpg
+    - assets/images/The_Vision_P2.jpg
+    - assets/images/ULK_P1.webp
+    - assets/images/ULK_P2.jpeg
+    - assets/images/ULK_P3.jpg
+    - assets/images/ULK_P4.jpg
+    - assets/images/ULK_P5.jpg
+    - assets/images/ULK_P6.jpg
+    - assets/images/ULK_PL1.jpg
+    - assets/images/ULK_PL2.jpg
+    - assets/images/UoK_P1.jpg
+    - assets/images/UoK_P2.jpg
+    - assets/images/UoK_P3.jpg
+    - assets/images/UoK_P4.jpg
+    - assets/images/UoK_P5.jpg
+    - assets/images/UNLAK_P1.jpg
+    - assets/images/UNLAK_P2.jpg
+    - assets/images/UNLAK_P3.jpg
+    - assets/images/INES_P1.jpeg
+    - assets/images/INES_P2.jpeg
+    - assets/images/INES_P3.jpg
+    - assets/images/UR_P1.jpeg
+    - assets/images/UR_P2.jpeg
+    - assets/images/UR_P3.jpeg
+    - assets/images/UR_P4.jpg
+    - assets/images/UR_P5.jpg
+    - assets/images/UR_P6.jpg
+    - assets/images/In_Rwanda_1.jpg
+    - assets/images/In_Rwanda_2.jpg
+    - assets/images/In_Rwanda_3.jpg
+    - assets/images/In_Rwanda_4.jpg
+    - assets/images/In_Rwanda_5.jpg
+    - assets/images/In_Rwanda_6.jpg
+    - assets/images/In_Rwanda_7.jpg
+    - assets/images/In_Rwanda_8.jpg
+    - assets/images/In_Rwanda_9.jpg
+    - assets/images/In_Rwanda_10.jpg
+    - assets/fonts/
+
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Regular.ttf
+        - asset: assets/fonts/Cairo-Bold.ttf
+          weight: 700
+    - family: Tajawal
+      fonts:
+        - asset: assets/fonts/Tajawal-Regular.ttf
+        - asset: assets/fonts/Tajawal-Bold.ttf
+          weight: 700
