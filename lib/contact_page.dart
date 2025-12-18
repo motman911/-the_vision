@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 
 import 'theme_provider.dart';
+import 'l10n/language_provider.dart';
 import 'email_service.dart';
 
 class ContactPage extends StatefulWidget {
@@ -56,21 +57,25 @@ class _ContactPageState extends State<ContactPage>
     super.dispose();
   }
 
-  void _showImageSourceDialog(String type) {
+  void _showImageSourceDialog(BuildContext context, String type) {
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('اختر مصدر الصورة'),
+        title: Text(languageProvider.isArabic
+            ? 'اختر مصدر الصورة'
+            : 'Choose Image Source'),
         actions: [
           TextButton(
-            child: const Text('كاميرا'),
+            child: Text(languageProvider.isArabic ? 'كاميرا' : 'Camera'),
             onPressed: () {
               Navigator.pop(context);
               _pickImage(ImageSource.camera, type);
             },
           ),
           TextButton(
-            child: const Text('معرض'),
+            child: Text(languageProvider.isArabic ? 'معرض' : 'Gallery'),
             onPressed: () {
               Navigator.pop(context);
               _pickImage(ImageSource.gallery, type);
@@ -85,22 +90,24 @@ class _ContactPageState extends State<ContactPage>
     final XFile? pickedFile =
         await _picker.pickImage(source: source, imageQuality: 80);
     if (pickedFile != null) {
-      setState(() {
-        switch (type) {
-          case 'passport':
-            passportImage = File(pickedFile.path);
-            break;
-          case 'personal':
-            personalPhoto = File(pickedFile.path);
-            break;
-          case 'certificateFront':
-            certificateFront = File(pickedFile.path);
-            break;
-          case 'certificateBack':
-            certificateBack = File(pickedFile.path);
-            break;
-        }
-      });
+      if (mounted) {
+        setState(() {
+          switch (type) {
+            case 'passport':
+              passportImage = File(pickedFile.path);
+              break;
+            case 'personal':
+              personalPhoto = File(pickedFile.path);
+              break;
+            case 'certificateFront':
+              certificateFront = File(pickedFile.path);
+              break;
+            case 'certificateBack':
+              certificateBack = File(pickedFile.path);
+              break;
+          }
+        });
+      }
     }
   }
 
@@ -110,271 +117,456 @@ class _ContactPageState extends State<ContactPage>
       allowedExtensions: ['pdf'],
     );
     if (result != null && result.files.single.path != null) {
-      setState(() {
-        pdfFile = File(result.files.single.path!);
-      });
+      if (mounted) {
+        setState(() {
+          pdfFile = File(result.files.single.path!);
+        });
+      }
     }
   }
 
-  String? _validateWhatsApp(String? value) {
-    if (value == null || value.isEmpty) return 'يرجى إدخال رقم الواتساب';
+  String? _validateWhatsApp(String? value, BuildContext context) {
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+    if (value == null || value.isEmpty) {
+      return languageProvider.isArabic
+          ? 'يرجى إدخال رقم الواتساب'
+          : 'Please enter WhatsApp number';
+    }
     final regex = RegExp(r'^[0-9]{10,15}$');
-    if (!regex.hasMatch(value)) return 'يرجى إدخال رقم واتساب صحيح';
+    if (!regex.hasMatch(value)) {
+      return languageProvider.isArabic
+          ? 'يرجى إدخال رقم واتساب صحيح'
+          : 'Please enter a valid WhatsApp number';
+    }
     return null;
   }
 
   Widget _imagePreview(String label, File? file) {
     return Column(
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 4),
-        file != null
-            ? Image.file(file, height: 100, width: 100, fit: BoxFit.cover)
-            : Container(
-                height: 100,
-                width: 100,
-                color: Colors.grey[200],
-                child: const Icon(Icons.image, size: 40, color: Colors.grey),
-              ),
+        Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: file != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(file, fit: BoxFit.cover),
+                )
+              : Container(
+                  color: Colors.grey[200],
+                  child: const Icon(
+                    Icons.image,
+                    size: 40,
+                    color: Colors.grey,
+                  ),
+                ),
+        ),
       ],
     );
   }
 
+  void _sendData(BuildContext context) {
+    if (isSending || !mounted) return;
+
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (passportImage == null ||
+        personalPhoto == null ||
+        certificateFront == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(languageProvider.isArabic
+              ? 'الحقول الأساسية غير مكتملة!'
+              : 'Required fields are incomplete!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => isSending = true);
+
+    Future.microtask(() async {
+      try {
+        await sendEmail(
+          _nameController.text,
+          pdfFile,
+          passportImage!,
+          personalPhoto!,
+          certificateFront!,
+          certificateBack,
+          phone: _phoneController.text,
+          whatsapp: _whatsappController.text,
+          email: _emailController.text,
+          country: selectedCountry,
+        );
+
+        if (!mounted) return;
+
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(languageProvider.isArabic
+                ? 'تم استلام البيانات! سنتواصل معك'
+                : 'Data received! We will contact you'),
+            backgroundColor: themeProvider.primaryColor,
+          ),
+        );
+
+        _nameController.clear();
+        _emailController.clear();
+        _phoneController.clear();
+        _whatsappController.clear();
+
+        if (mounted) {
+          setState(() {
+            passportImage = null;
+            personalPhoto = null;
+            certificateFront = null;
+            certificateBack = null;
+            pdfFile = null;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(languageProvider.isArabic
+                  ? 'حدث خطأ أثناء إرسال البيانات: $e'
+                  : 'An error occurred while sending data: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => isSending = false);
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('اتصل بنا'),
-        backgroundColor: themeProvider.primaryColor,
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnim,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'أرسل لنا بياناتك',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: themeProvider.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // الاسم (اجباري)
-                Row(
-                  children: const [
-                    Text('*', style: TextStyle(color: Colors.red)),
-                    SizedBox(width: 4),
-                    Text('الاسم',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    hintText: 'ادخل اسمك',
-                  ),
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'يرجى إدخال الاسم'
-                      : null,
-                ),
-                const SizedBox(height: 12),
-                // رقم الواتساب (اجباري)
-                Row(
-                  children: const [
-                    Text('*', style: TextStyle(color: Colors.red)),
-                    SizedBox(width: 4),
-                    Text('رقم الواتساب',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                TextFormField(
-                  controller: _whatsappController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    hintText: 'ادخل رقم الواتساب',
-                  ),
-                  keyboardType: TextInputType.phone,
-                  validator: _validateWhatsApp,
-                ),
-                const SizedBox(height: 12),
-                // رقم الهاتف
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'رقم الهاتف (اختياري)',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 12),
-                // البريد الالكتروني
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'البريد الإلكتروني (اختياري)',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 12),
-                // الجنسية
-                DropdownButtonFormField<String>(
-                  initialValue: selectedCountry,
-                  items: const [
-                    DropdownMenuItem(value: 'SD', child: Text('السودان')),
-                    DropdownMenuItem(value: 'SY', child: Text('سوريا')),
-                    DropdownMenuItem(value: 'YE', child: Text('اليمن')),
-                    DropdownMenuItem(value: 'SS', child: Text('جنوب السودان')),
-                    DropdownMenuItem(value: 'TD', child: Text('تشاد')),
-                  ],
-                  onChanged: (value) =>
-                      setState(() => selectedCountry = value!),
-                  decoration: InputDecoration(
-                    labelText: 'الجنسية',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+    return Consumer2<ThemeProvider, LanguageProvider>(
+      builder: (context, themeProvider, languageProvider, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              languageProvider.contactUs,
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            backgroundColor: themeProvider.primaryColor,
+            foregroundColor: Colors.white,
+            centerTitle: true,
+            elevation: 4,
+          ),
+          body: FadeTransition(
+            opacity: _fadeAnim,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                      onTap: () => _showImageSourceDialog('passport'),
-                      child: _imagePreview('جواز السفر', passportImage),
+                    Text(
+                      languageProvider.isArabic
+                          ? 'أرسل لنا بياناتك'
+                          : 'Send us your information',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: themeProvider.primaryColor,
+                      ),
                     ),
-                    GestureDetector(
-                      onTap: () => _showImageSourceDialog('personal'),
-                      child: _imagePreview('صورة شخصية', personalPhoto),
+                    const SizedBox(height: 16),
+
+                    // الاسم (اجباري)
+                    Row(
+                      children: [
+                        const Text('*', style: TextStyle(color: Colors.red)),
+                        const SizedBox(width: 4),
+                        Text(
+                          languageProvider.isArabic ? 'الاسم' : 'Name',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
-                    GestureDetector(
-                      onTap: () => _showImageSourceDialog('certificateFront'),
-                      child: _imagePreview('شهادة أمام', certificateFront),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        hintText: languageProvider.isArabic
+                            ? 'ادخل اسمك'
+                            : 'Enter your name',
+                        contentPadding: const EdgeInsets.all(16),
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? (languageProvider.isArabic
+                              ? 'يرجى إدخال الاسم'
+                              : 'Please enter your name')
+                          : null,
                     ),
-                    GestureDetector(
-                      onTap: () => _showImageSourceDialog('certificateBack'),
-                      child:
-                          _imagePreview('شهادة خلف (اختياري)', certificateBack),
+                    const SizedBox(height: 12),
+
+                    // رقم الواتساب (اجباري)
+                    Row(
+                      children: [
+                        const Text('*', style: TextStyle(color: Colors.red)),
+                        const SizedBox(width: 4),
+                        Text(
+                          languageProvider.isArabic
+                              ? 'رقم الواتساب'
+                              : 'WhatsApp Number',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _whatsappController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        hintText: languageProvider.isArabic
+                            ? 'ادخل رقم الواتساب'
+                            : 'Enter WhatsApp number',
+                        contentPadding: const EdgeInsets.all(16),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      validator: (value) => _validateWhatsApp(value, context),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // رقم الهاتف
+                    TextFormField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        labelText: languageProvider.isArabic
+                            ? 'رقم الهاتف (اختياري)'
+                            : 'Phone Number (Optional)',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.all(16),
+                      ),
+                      keyboardType: TextInputType.phone,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // البريد الالكتروني
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: languageProvider.isArabic
+                            ? 'البريد الإلكتروني (اختياري)'
+                            : 'Email (Optional)',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.all(16),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // الجنسية
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedCountry,
+                      items: [
+                        DropdownMenuItem(
+                          value: 'SD',
+                          child: Text(
+                              languageProvider.isArabic ? 'السودان' : 'Sudan'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'SY',
+                          child: Text(
+                              languageProvider.isArabic ? 'سوريا' : 'Syria'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'YE',
+                          child: Text(
+                              languageProvider.isArabic ? 'اليمن' : 'Yemen'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'SS',
+                          child: Text(languageProvider.isArabic
+                              ? 'جنوب السودان'
+                              : 'South Sudan'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'TD',
+                          child:
+                              Text(languageProvider.isArabic ? 'تشاد' : 'Chad'),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => selectedCountry = value);
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: languageProvider.isArabic
+                            ? 'الجنسية'
+                            : 'Nationality',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.all(16),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Text(
+                      languageProvider.isArabic
+                          ? 'المستندات المطلوبة'
+                          : 'Required Documents',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: themeProvider.primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 16,
+                      children: [
+                        GestureDetector(
+                          onTap: () =>
+                              _showImageSourceDialog(context, 'passport'),
+                          child: _imagePreview(
+                            languageProvider.isArabic
+                                ? 'جواز السفر'
+                                : 'Passport',
+                            passportImage,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () =>
+                              _showImageSourceDialog(context, 'personal'),
+                          child: _imagePreview(
+                            languageProvider.isArabic
+                                ? 'صورة شخصية'
+                                : 'Personal Photo',
+                            personalPhoto,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => _showImageSourceDialog(
+                              context, 'certificateFront'),
+                          child: _imagePreview(
+                            languageProvider.isArabic
+                                ? 'شهادة أمام'
+                                : 'Certificate Front',
+                            certificateFront,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => _showImageSourceDialog(
+                              context, 'certificateBack'),
+                          child: _imagePreview(
+                            languageProvider.isArabic
+                                ? 'شهادة خلف (اختياري)'
+                                : 'Certificate Back (Optional)',
+                            certificateBack,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    ElevatedButton(
+                      onPressed: () => _pickPDF(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: themeProvider.surfaceColor,
+                        foregroundColor: themeProvider.textColor,
+                        minimumSize: const Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        pdfFile != null
+                            ? (languageProvider.isArabic
+                                ? 'PDF محدد: ${pdfFile!.path.split('/').last}'
+                                : 'PDF Selected: ${pdfFile!.path.split('/').last}')
+                            : (languageProvider.isArabic
+                                ? 'رفع PDF (اختياري)'
+                                : 'Upload PDF (Optional)'),
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: isSending
+                            ? null
+                            : () {
+                                _sendData(context);
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: themeProvider.secondaryColor,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(250, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Text(
+                          isSending
+                              ? (languageProvider.isArabic
+                                  ? 'جاري الإرسال...'
+                                  : 'Sending...')
+                              : (languageProvider.isArabic
+                                  ? 'إرسال البيانات'
+                                  : 'Send Data'),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                   ],
                 ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: _pickPDF,
-                  child: Text(pdfFile != null
-                      ? 'PDF محدد: ${pdfFile!.path.split('/').last}'
-                      : 'رفع PDF (اختياري)'),
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: isSending
-                        ? null
-                        : () async {
-                            if (_formKey.currentState!.validate()) {
-                              if (passportImage == null ||
-                                  personalPhoto == null ||
-                                  certificateFront == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Text('الحقول الأساسية غير مكتملة!'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                                return;
-                              }
-
-                              setState(() => isSending = true);
-
-                              try {
-                                await sendEmail(
-                                  _nameController.text,
-                                  pdfFile,
-                                  passportImage!,
-                                  personalPhoto!,
-                                  certificateFront!,
-                                  certificateBack,
-                                  phone: _phoneController.text,
-                                  whatsapp: _whatsappController.text,
-                                  email: _emailController.text,
-                                  country: selectedCountry,
-                                );
-
-                                // ignore: use_build_context_synchronously
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: const Text(
-                                        'تم استلام البيانات! سنتواصل معك'),
-                                    backgroundColor: themeProvider.primaryColor,
-                                  ),
-                                );
-
-                                _nameController.clear();
-                                _emailController.clear();
-                                _phoneController.clear();
-                                _whatsappController.clear();
-                                setState(() {
-                                  passportImage = null;
-                                  personalPhoto = null;
-                                  certificateFront = null;
-                                  certificateBack = null;
-                                  pdfFile = null;
-                                });
-                              } catch (e) {
-                                // ignore: use_build_context_synchronously
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        'حدث خطأ أثناء إرسال البيانات: $e'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              } finally {
-                                setState(() => isSending = false);
-                              }
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: themeProvider.accentColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 5,
-                    ),
-                    child: isSending
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 3),
-                          )
-                        : const Text('إرسال البيانات'),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

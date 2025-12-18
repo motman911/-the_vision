@@ -5,7 +5,8 @@ plugins {
 }
 
 android {
-    namespace = "com.example.the_vision"
+    // 🔧 غير هذا السطر - يجب أن يكون نفس applicationId
+    namespace = "com.sks.vision"  // غير من "com.example.the_vision"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -19,11 +20,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.sks.vision"
+        applicationId = "com.sks.vision"  // ✅ هذا صحيح
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = 1  // 🔧 أضف قيمة ثابتة
+        versionName = "1.0.0"  // 🔧 أضف قيمة ثابتة
     }
 
     signingConfigs {
@@ -41,6 +42,9 @@ android {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             isShrinkResources = false
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

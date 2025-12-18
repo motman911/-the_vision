@@ -1,3 +1,5 @@
+// ignore_for_file: unreachable_switch_default
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,21 +22,34 @@ class ThemeProvider with ChangeNotifier {
   }
 
   Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final themeIndex = prefs.getInt(_themeKey) ?? 0;
-    _currentTheme = AppTheme.values[themeIndex];
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final themeIndex = prefs.getInt(_themeKey) ?? 0;
+      _currentTheme = AppTheme.values[themeIndex];
+    } catch (e) {
+      _currentTheme = AppTheme.light;
+    }
     notifyListeners();
   }
 
   Future<void> setTheme(AppTheme theme) async {
     _currentTheme = theme;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_themeKey, theme.index);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_themeKey, theme.index);
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error saving theme: $e');
+    }
     notifyListeners();
   }
 
   ThemeData get currentThemeData {
-    switch (_currentTheme) {
+    return _getThemeData(_currentTheme);
+  }
+
+  ThemeData _getThemeData(AppTheme theme) {
+    switch (theme) {
       case AppTheme.dark:
         return darkTheme;
       case AppTheme.blue:
@@ -44,6 +59,7 @@ class ThemeProvider with ChangeNotifier {
       case AppTheme.orange:
         return orangeTheme;
       case AppTheme.light:
+      default:
         return lightTheme;
     }
   }
@@ -111,6 +127,9 @@ class ThemeProvider with ChangeNotifier {
       foregroundColor: Colors.white,
       elevation: 4,
     ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Colors.white,
+    ),
   );
 
   // الثيم الأخضر
@@ -129,6 +148,9 @@ class ThemeProvider with ChangeNotifier {
       backgroundColor: Color(0xFF15803d),
       foregroundColor: Colors.white,
       elevation: 4,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Colors.white,
     ),
   );
 
@@ -149,20 +171,32 @@ class ThemeProvider with ChangeNotifier {
       foregroundColor: Colors.white,
       elevation: 4,
     ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Colors.white,
+    ),
   );
 
-  Color get primaryColor => currentThemeData.primaryColor;
-  Color get secondaryColor => currentThemeData.colorScheme.secondary;
-  Color get backgroundColor => currentThemeData.scaffoldBackgroundColor;
-  Color get cardColor => currentThemeData.cardColor;
-  Color get textColor => currentThemeData.brightness == Brightness.dark
-      ? Colors.white
-      : Colors.black87;
-
-  Color get accentColor {
+  // الألوان المحددة من الثيمات
+  Color get primaryColor {
     switch (_currentTheme) {
       case AppTheme.dark:
         return const Color(0xFF14b8a6);
+      case AppTheme.blue:
+        return const Color(0xFF1e40af);
+      case AppTheme.green:
+        return const Color(0xFF15803d);
+      case AppTheme.orange:
+        return const Color(0xFFea580c);
+      case AppTheme.light:
+      default:
+        return const Color(0xFF0f766e);
+    }
+  }
+
+  Color get secondaryColor {
+    switch (_currentTheme) {
+      case AppTheme.dark:
+        return const Color(0xFF0f766e);
       case AppTheme.blue:
         return const Color(0xFF3b82f6);
       case AppTheme.green:
@@ -170,9 +204,78 @@ class ThemeProvider with ChangeNotifier {
       case AppTheme.orange:
         return const Color(0xFFfb923c);
       case AppTheme.light:
-      // ignore: unreachable_switch_default
       default:
-        return const Color(0xFFf97316);
+        return const Color(0xFF14b8a6);
     }
+  }
+
+  Color get accentColor => secondaryColor;
+
+  Color get cardColor {
+    switch (_currentTheme) {
+      case AppTheme.dark:
+        return const Color(0xFF1a1a1a);
+      default:
+        return Colors.white;
+    }
+  }
+
+  Color get textColor {
+    switch (_currentTheme) {
+      case AppTheme.dark:
+        return Colors.white;
+      default:
+        return Colors.black87;
+    }
+  }
+
+  Color get backgroundColor {
+    switch (_currentTheme) {
+      case AppTheme.dark:
+        return const Color(0xFF121212);
+      case AppTheme.blue:
+        return const Color(0xFFf0f9ff);
+      case AppTheme.green:
+        return const Color(0xFFf0fdf4);
+      case AppTheme.orange:
+        return const Color(0xFFfff7ed);
+      case AppTheme.light:
+      default:
+        return const Color(0xFFf8fafc);
+    }
+  }
+
+  Color get surfaceColor {
+    switch (_currentTheme) {
+      case AppTheme.dark:
+        return const Color(0xFF1a1a1a);
+      case AppTheme.blue:
+        return const Color(0xFFf0f9ff);
+      case AppTheme.green:
+        return const Color(0xFFf0fdf4);
+      case AppTheme.orange:
+        return const Color(0xFFfff7ed);
+      case AppTheme.light:
+      default:
+        return const Color(0xFFf8fafc);
+    }
+  }
+
+  // ألوان إضافية
+  Color get primaryColorLight => _colorWithOpacity(primaryColor, 0.1);
+  Color get primaryColorMedium => _colorWithOpacity(primaryColor, 0.3);
+  Color get secondaryColorLight => _colorWithOpacity(secondaryColor, 0.1);
+
+  Color get onPrimaryColor => Colors.white;
+  Color get onSecondaryColor => Colors.white;
+  Color get errorColor => const Color(0xFFef4444);
+  Color get successColor => const Color(0xFF22c55e);
+  Color get warningColor => const Color(0xFFf59e0b);
+  Color get infoColor => const Color(0xFF0ea5e9);
+
+  // دالة مساعدة للـ opacity
+  Color _colorWithOpacity(Color color, double opacity) {
+    final clampedOpacity = opacity.clamp(0.0, 1.0);
+    return color.withOpacity(clampedOpacity);
   }
 }

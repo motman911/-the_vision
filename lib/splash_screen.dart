@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
-
 import 'home_screen.dart';
 import 'theme_provider.dart';
+import 'l10n/language_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,73 +15,99 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
-    });
+    _navigateToHome();
+  }
+
+  Future<void> _navigateToHome() async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Scaffold(
       backgroundColor: themeProvider.primaryColor,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 1000),
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 15,
-                    spreadRadius: 2,
+      body: SafeArea(
+        child: Center(
+          child: Directionality(
+            textDirection: languageProvider.isArabic
+                ? TextDirection.rtl
+                : TextDirection.ltr,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 120, // حجم ثابت
+                  height: 120, // حجم ثابت
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20), // حجم ثابت
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Icon(
-                Icons.school,
-                size: 60,
-                color: themeProvider.primaryColor,
-              ),
+                  child: Icon(
+                    Icons.school,
+                    size: 60, // حجم ثابت
+                    color: const Color(0xFF0f766e),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Text(
+                  languageProvider.isArabic ? 'مكتب الرؤية' : 'Vision Office',
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  languageProvider.isArabic
+                      ? 'الدراسة في رواندا'
+                      : 'Study in Rwanda',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                SizedBox(
+                  width: 30, // حجم ثابت
+                  height: 30, // حجم ثابت
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Colors.white,
+                    backgroundColor: Colors.white.withOpacity(0.3),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            const Text(
-              'مكتب الرؤية',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontFamily: 'Cairo',
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'الدراسة في رواندا',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white70,
-                fontFamily: 'Cairo',
-              ),
-            ),
-            const SizedBox(height: 30),
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                // ignore: deprecated_member_use
-                Colors.white.withOpacity(0.8),
-              ),
-              strokeWidth: 3,
-            ),
-          ],
+          ),
         ),
       ),
     );

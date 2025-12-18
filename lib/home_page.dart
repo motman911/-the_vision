@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+// ignore: unused_import
 import 'package:url_launcher/url_launcher.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'dart:async';
@@ -10,6 +11,7 @@ import 'contact_page.dart';
 import 'faq_page.dart';
 import 'gallery_page.dart';
 import 'theme_provider.dart';
+import 'l10n/language_provider.dart';
 import 'widgets.dart';
 
 class HomePage extends StatefulWidget {
@@ -59,184 +61,147 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
-    return Scaffold(
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverToBoxAdapter(
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Container(
+            height: 146,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/The_Vision_P1.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
             child: Container(
-              height: 146,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/The_Vision_P1.jpg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      // ignore: deprecated_member_use
-                      Colors.black.withOpacity(0.3),
-                      // ignore: deprecated_member_use
-                      Colors.black.withOpacity(0.1),
-                    ],
-                  ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.3),
+                    Colors.black.withOpacity(0.1),
+                  ],
                 ),
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    child: Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        SizedBox(
-                          height: 225,
-                          child: PageView(
-                            controller: _imageController,
-                            onPageChanged: (index) {
-                              setState(() {
-                                _currentImageIndex = index;
-                              });
-                            },
-                            children: [
-                              _buildImageCard('assets/images/The_Vision_P2.jpg',
-                                  themeProvider),
-                              _buildImageCard('assets/images/In_Rwanda_1.jpg',
-                                  themeProvider),
-                            ],
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 10,
-                          child: AnimatedSmoothIndicator(
-                            activeIndex: _currentImageIndex,
-                            count: 2,
-                            effect: WormEffect(
-                              dotHeight: 8,
-                              dotWidth: 8,
-                              activeDotColor: themeProvider.accentColor,
-                              dotColor: Colors.white70,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _buildWelcomeCard(context, themeProvider),
-                  const SizedBox(height: 24),
-                  _buildSectionTitle('خدماتنا الرئيسية', themeProvider),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 130,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        ServicePreviewCard(
-                          title: 'خدمات التقديم',
-                          icon: Icons.description,
-                          page: const ServicesPage(),
-                          themeProvider: themeProvider,
-                        ),
-                        ServicePreviewCard(
-                          title: 'ما بعد القبول',
-                          icon: Icons.home_work,
-                          page: const ServicesPage(),
-                          themeProvider: themeProvider,
-                        ),
-                        ServicePreviewCard(
-                          title: 'دعم الطلاب',
-                          icon: Icons.school,
-                          page: const ServicesPage(),
-                          themeProvider: themeProvider,
-                        ),
-                        ServicePreviewCard(
-                          title: 'استشارات أكاديمية',
-                          icon: Icons.lightbulb,
-                          page: const ServicesPage(),
-                          themeProvider: themeProvider,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  _buildSectionTitle('مميزات الدراسة في رواندا', themeProvider),
-                  const SizedBox(height: 12),
-                  _buildFeatureItem(
-                      'تكاليف مناسبة ورسوم دراسية معقولة', themeProvider),
-                  _buildFeatureItem(
-                      'جودة تعليمية عالية ومعترف بها دولياً', themeProvider),
-                  _buildFeatureItem(
-                      'بيئة آمنة وملائمة للطلاب الدوليين', themeProvider),
-                  _buildFeatureItem('لغة الدراسة بالإنجليزية في معظم التخصصات',
-                      themeProvider),
-                  _buildFeatureItem('فيزا مجانية عند الوصول مع القبول الجامعي',
-                      themeProvider),
-                  const SizedBox(height: 28),
-                  _buildSectionTitle('تكاليف المعيشة الشهرية', themeProvider),
-                  const SizedBox(height: 12),
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: 0.99,
-                    crossAxisSpacing: 0.9,
-                    mainAxisSpacing: 10,
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: languageProvider.isArabic
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.end,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 20),
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
                     children: [
-                      _buildCostCard('السكن الفردي', '100 - 150', 'دولار/شهر',
-                          Icons.home, themeProvider),
-                      _buildCostCard('السكن المشترك', '50 - 100', 'دولار/شهر',
-                          Icons.people, themeProvider),
-                      _buildCostCard('الإعاشة الشهرية', '100 - 150',
-                          'دولار/شهر', Icons.restaurant, themeProvider),
-                      _buildCostCard('المواصلات', '20 - 40', 'دولار/شهر',
-                          Icons.directions_bus, themeProvider),
+                      SizedBox(
+                        height: 225,
+                        child: PageView(
+                          controller: _imageController,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentImageIndex = index;
+                            });
+                          },
+                          children: [
+                            _buildImageCard('assets/images/The_Vision_P2.jpg',
+                                themeProvider),
+                            _buildImageCard(
+                                'assets/images/In_Rwanda_1.jpg', themeProvider),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 10,
+                        child: SmoothPageIndicator(
+                          controller: _imageController,
+                          count: 2,
+                          effect: WormEffect(
+                            dotHeight: 8,
+                            dotWidth: 8,
+                            activeDotColor: themeProvider.accentColor,
+                            dotColor: Colors.white70,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 28),
-                  _buildSectionTitle('آراء طلابنا', themeProvider),
-                  const SizedBox(height: 12),
-                  _buildTestimonial(
-                    'محمد اشرف',
-                    'طالب برمجيات - جامعة كيغالي المستقلة',
-                    'مكتب الرؤية غير مجرد مكتب استشارات، هم عائلة داعمة. من لحظة التواصل الأولى حتى وصولي إلى رواندا، شعروا بمسؤوليتي كأخ كبير. ما يميزهم هو المتابعة المستمرة بعد الوصول ومساعدتهم في حل أي مشكلة تواجهني.',
-                    themeProvider,
+                ),
+                _buildWelcomeCard(context, themeProvider, languageProvider),
+                const SizedBox(height: 24),
+                _buildSectionTitle(
+                    languageProvider.mainServices, themeProvider),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 130,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    reverse: !languageProvider.isArabic,
+                    children: [
+                      ServicePreviewCard(
+                        title: languageProvider.applyServices,
+                        icon: Icons.description,
+                        page: const ServicesPage(),
+                        themeProvider: themeProvider,
+                      ),
+                      ServicePreviewCard(
+                        title: languageProvider.afterAcceptance,
+                        icon: Icons.home_work,
+                        page: const ServicesPage(),
+                        themeProvider: themeProvider,
+                      ),
+                      ServicePreviewCard(
+                        title: languageProvider.studentSupport,
+                        icon: Icons.school,
+                        page: const ServicesPage(),
+                        themeProvider: themeProvider,
+                      ),
+                      ServicePreviewCard(
+                        title: languageProvider.academicConsultation,
+                        icon: Icons.lightbulb,
+                        page: const ServicesPage(),
+                        themeProvider: themeProvider,
+                      ),
+                    ],
                   ),
-                  _buildTestimonial(
-                    'عثمان محمد',
-                    'طالب برمجيات - جامعة كيغالي',
-                    'تجربتي مع مكتب الرؤية كانت ممتازة بكل المقاييس. ساعدوني في اختيار التخصص المناسب، وجمع المستندات، وحتى بعد وصولي لم يتركوني وحيداً. ساعدوني في إيجاد سكن مناسب وقريب من الجامعة. أنصح أي طالب يريد الدراسة في رواندا بالتعامل معهم.',
-                    themeProvider,
-                  ),
-                  const SizedBox(height: 28),
-                  _buildFAQCard(context, themeProvider),
-                  _buildUniversitiesCard(context, themeProvider),
-                  _buildGalleryCard(context, themeProvider),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: WhatsAppButton(
-                      onPressed: () {
-                        _launchWhatsAppChat();
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+                ),
+                const SizedBox(height: 28),
+                _buildSectionTitle(
+                    languageProvider.studyFeatures, themeProvider),
+                const SizedBox(height: 12),
+                ..._buildFeatureItems(themeProvider, languageProvider),
+                const SizedBox(height: 28),
+                _buildSectionTitle(languageProvider.livingCosts, themeProvider),
+                const SizedBox(height: 12),
+                _buildCostsGrid(themeProvider, languageProvider),
+                const SizedBox(height: 28),
+                _buildSectionTitle(
+                    languageProvider.testimonials, themeProvider),
+                const SizedBox(height: 12),
+                ..._buildTestimonials(themeProvider, languageProvider),
+                const SizedBox(height: 28),
+                _buildFAQCard(context, themeProvider, languageProvider),
+                _buildUniversitiesCard(
+                    context, themeProvider, languageProvider),
+                _buildGalleryCard(context, themeProvider, languageProvider),
+                const SizedBox(height: 20),
+                Center(
+                  child: WhatsAppButton(),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -264,10 +229,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildWelcomeCard(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildWelcomeCard(BuildContext context, ThemeProvider themeProvider,
+      LanguageProvider languageProvider) {
     return Card(
       elevation: 6,
-      shadowColor: Colors.black.withValues(alpha: 0.2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       child: Container(
         decoration: BoxDecoration(
@@ -280,32 +245,25 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           borderRadius: BorderRadius.circular(16.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              const Text(
-                'ابتعث إلى رواندا مع مكتب الرؤية',
+              Text(
+                languageProvider.appTitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'ابدأ رحلتك التعليمية في رواندا مع دعم متكامل من الخبراء',
+              Text(
+                languageProvider.startJourney,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.white70),
+                style: const TextStyle(fontSize: 14, color: Colors.white70),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -323,12 +281,11 @@ class _HomePageState extends State<HomePage> {
                       const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30.0)),
-                  elevation: 6,
-                  shadowColor: Colors.black.withValues(alpha: 0.3),
                 ),
-                child: const Text(
-                  'اتصل بنا الآن',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                child: Text(
+                  languageProvider.contactNow,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -352,70 +309,123 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildFeatureItem(String text, ThemeProvider themeProvider) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: Icon(Icons.check_circle, color: themeProvider.accentColor),
-        minLeadingWidth: 0,
-        title: Text(
-          text,
-          style: const TextStyle(fontSize: 14),
+  List<Widget> _buildFeatureItems(
+      ThemeProvider themeProvider, LanguageProvider languageProvider) {
+    final features = [
+      languageProvider.feature1,
+      languageProvider.feature2,
+      languageProvider.feature3,
+      languageProvider.feature4,
+      languageProvider.feature5,
+    ];
+
+    return features.map((feature) {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        child: Card(
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ListTile(
+            leading: Icon(Icons.check_circle, color: themeProvider.accentColor),
+            minLeadingWidth: 0,
+            title: Text(
+              feature,
+              style: const TextStyle(fontSize: 14),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+      );
+    }).toList();
   }
 
-  Widget _buildCostCard(String title, String cost, String unit, IconData icon,
-      ThemeProvider themeProvider) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 28, color: themeProvider.primaryColor),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 6),
-            RichText(
-              text: TextSpan(
-                text: cost,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: themeProvider.accentColor,
+  Widget _buildCostsGrid(
+      ThemeProvider themeProvider, LanguageProvider languageProvider) {
+    final costs = [
+      {
+        'title': languageProvider.singleRoom,
+        'cost': '100 - 150',
+        'icon': Icons.home,
+      },
+      {
+        'title': languageProvider.sharedRoom,
+        'cost': '50 - 100',
+        'icon': Icons.people,
+      },
+      {
+        'title': languageProvider.monthlyLiving,
+        'cost': '100 - 150',
+        'icon': Icons.restaurant,
+      },
+      {
+        'title': languageProvider.transportation,
+        'cost': '20 - 40',
+        'icon': Icons.directions_bus,
+      },
+    ];
+
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 0.99,
+      crossAxisSpacing: 0.9,
+      mainAxisSpacing: 10,
+      children: costs.map((item) {
+        return Card(
+          elevation: 4,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(item['icon'] as IconData,
+                    size: 28, color: themeProvider.primaryColor),
+                const SizedBox(height: 8),
+                Text(
+                  item['title'] as String,
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.center,
                 ),
-                children: [
-                  TextSpan(
-                    text: ' $unit',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.grey,
+                const SizedBox(height: 6),
+                RichText(
+                  text: TextSpan(
+                    text: item['cost'] as String,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: themeProvider.accentColor,
                     ),
+                    children: [
+                      TextSpan(
+                        text: ' ${languageProvider.dollarPerMonth}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }).toList(),
     );
   }
 
-  Widget _buildTestimonial(String name, String position, String content,
-      ThemeProvider themeProvider) {
+  Widget _buildTestimonial(
+      String name, String content, ThemeProvider themeProvider,
+      {int rating = 5}) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 4,
@@ -455,11 +465,17 @@ class _HomePageState extends State<HomePage> {
                           fontSize: 16,
                         ),
                       ),
-                      Text(
-                        position,
-                        style: TextStyle(color: Colors.grey[700], fontSize: 14),
-                      ),
                     ],
+                  ),
+                ),
+                Row(
+                  children: List.generate(
+                    5,
+                    (index) => Icon(
+                      Icons.star,
+                      size: 18,
+                      color: index < rating ? Colors.amber : Colors.grey[300],
+                    ),
                   ),
                 ),
               ],
@@ -470,7 +486,38 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildFAQCard(BuildContext context, ThemeProvider themeProvider) {
+  List<Widget> _buildTestimonials(
+      ThemeProvider themeProvider, LanguageProvider languageProvider) {
+    return [
+      _buildTestimonial(
+        languageProvider.isArabic ? 'أحمد محمد' : 'Ahmed Mohamed',
+        languageProvider.isArabic
+            ? 'تجربة رائعة مع The Vision، ساعدوني في الحصول على قبول في جامعة رواندا'
+            : 'Great experience with The Vision, they helped me get accepted at Rwanda University',
+        themeProvider,
+        rating: 5,
+      ),
+      _buildTestimonial(
+        languageProvider.isArabic ? 'سارة علي' : 'Sara Ali',
+        languageProvider.isArabic
+            ? 'الدعم المستمر بعد الوصول كان ممتازاً، فريق محترف جداً'
+            : 'Continuous support after arrival was excellent, very professional team',
+        themeProvider,
+        rating: 4,
+      ),
+      _buildTestimonial(
+        languageProvider.isArabic ? 'يوسف حسن' : 'Youssef Hassan',
+        languageProvider.isArabic
+            ? 'تكاليف المعيشة مناسبة والجامعات ممتازة في رواندا'
+            : 'Living costs are reasonable and universities are excellent in Rwanda',
+        themeProvider,
+        rating: 5,
+      ),
+    ];
+  }
+
+  Widget _buildFAQCard(BuildContext context, ThemeProvider themeProvider,
+      LanguageProvider languageProvider) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -492,23 +539,25 @@ class _HomePageState extends State<HomePage> {
             ),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Padding(
-            padding: EdgeInsets.all(20.0),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                Icon(Icons.arrow_right, color: Colors.white, size: 30),
+                if (languageProvider.isArabic)
+                  Icon(Icons.arrow_right, color: Colors.white, size: 30),
                 Expanded(
                   child: Text(
-                    'الأسئلة الشائعة',
+                    languageProvider.faq,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
                   ),
                 ),
-                Icon(Icons.help_outline, color: Colors.white, size: 28),
+                if (!languageProvider.isArabic)
+                  Icon(Icons.help_outline, color: Colors.white, size: 28),
               ],
             ),
           ),
@@ -517,7 +566,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildGalleryCard(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildGalleryCard(BuildContext context, ThemeProvider themeProvider,
+      LanguageProvider languageProvider) {
     return GestureDetector(
       onTap: () {
         Navigator.push(context,
@@ -539,23 +589,25 @@ class _HomePageState extends State<HomePage> {
             ),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Padding(
-            padding: EdgeInsets.all(20.0),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                Icon(Icons.arrow_right, color: Colors.white, size: 30),
+                if (languageProvider.isArabic)
+                  Icon(Icons.arrow_right, color: Colors.white, size: 30),
                 Expanded(
                   child: Text(
-                    'معرض الصور - رواندا',
+                    languageProvider.galleryRwanda,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
                   ),
                 ),
-                Icon(Icons.photo_library, color: Colors.white, size: 28),
+                if (!languageProvider.isArabic)
+                  Icon(Icons.photo_library, color: Colors.white, size: 28),
               ],
             ),
           ),
@@ -564,8 +616,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildUniversitiesCard(
-      BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildUniversitiesCard(BuildContext context,
+      ThemeProvider themeProvider, LanguageProvider languageProvider) {
     return GestureDetector(
       onTap: () {
         Navigator.push(context,
@@ -584,38 +636,30 @@ class _HomePageState extends State<HomePage> {
             ),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Padding(
-            padding: EdgeInsets.all(20.0),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                Icon(Icons.arrow_right, color: Colors.white, size: 30),
+                if (languageProvider.isArabic)
+                  Icon(Icons.arrow_right, color: Colors.white, size: 30),
                 Expanded(
                   child: Text(
-                    'الجامعات الشهيرة في رواندا',
+                    languageProvider.famousUniversities,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
                   ),
                 ),
-                Icon(Icons.school, color: Colors.white, size: 28),
+                if (!languageProvider.isArabic)
+                  Icon(Icons.school, color: Colors.white, size: 28),
               ],
             ),
           ),
         ),
       ),
     );
-  }
-
-  Future<void> _launchWhatsAppChat() async {
-    const url =
-        'https://wa.me/+250795050689?text=مرحباً، أريد الاستفسار عن الدراسة في رواندا';
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
-    } else {
-      throw 'Could not launch $url';
-    }
   }
 }

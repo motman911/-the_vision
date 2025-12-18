@@ -4,6 +4,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
 import 'theme_provider.dart';
+import 'l10n/language_provider.dart';
 
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});
@@ -46,142 +47,156 @@ class _GalleryPageState extends State<GalleryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    return Consumer2<ThemeProvider, LanguageProvider>(
+      builder: (context, themeProvider, languageProvider, child) {
+        if (_isFullScreen) {
+          return Scaffold(
+            backgroundColor: Colors.black,
+            appBar: AppBar(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: _closeFullScreen,
+              ),
+              title: Text(
+                '${_currentIndex + 1} / ${galleryImages.length}',
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            body: PhotoViewGallery.builder(
+              itemCount: galleryImages.length,
+              builder: (context, index) {
+                return PhotoViewGalleryPageOptions(
+                  imageProvider: AssetImage(galleryImages[index]),
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.covered * 3.0,
+                  initialScale: PhotoViewComputedScale.contained,
+                  heroAttributes:
+                      PhotoViewHeroAttributes(tag: galleryImages[index]),
+                  basePosition: Alignment.center,
+                );
+              },
+              scrollPhysics: const BouncingScrollPhysics(),
+              backgroundDecoration: const BoxDecoration(
+                color: Colors.black,
+              ),
+              pageController: PageController(initialPage: _currentIndex),
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+            ),
+          );
+        }
 
-    if (_isFullScreen) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: _closeFullScreen,
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              languageProvider.gallery,
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            backgroundColor: themeProvider.primaryColor,
+            foregroundColor: Colors.white,
+            centerTitle: true,
+            elevation: 4,
           ),
-          title: Text(
-            '${_currentIndex + 1} / ${galleryImages.length}',
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
-        body: PhotoViewGallery.builder(
-          itemCount: galleryImages.length,
-          builder: (context, index) {
-            return PhotoViewGalleryPageOptions(
-              imageProvider: AssetImage(galleryImages[index]),
-              minScale: PhotoViewComputedScale.contained,
-              maxScale:
-                  PhotoViewComputedScale.covered * 3.0, // زيادة نسبة التكبير
-              initialScale: PhotoViewComputedScale.contained,
-              heroAttributes:
-                  PhotoViewHeroAttributes(tag: galleryImages[index]),
-              basePosition: Alignment.center,
-            );
-          },
-          scrollPhysics: const BouncingScrollPhysics(),
-          backgroundDecoration: const BoxDecoration(
-            color: Colors.black,
-          ),
-          pageController: PageController(initialPage: _currentIndex),
-          onPageChanged: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-        ),
-      );
-    }
-
-    return Scaffold(
-      body: Column(
-        children: [
-          // Container(
-          //   width: double.infinity,
-          //   padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          //   decoration: BoxDecoration(
-          //     color: themeProvider.primaryColor.withOpacity(0.1),
-          //     borderRadius: BorderRadius.circular(12),
-          //   ),
-          //   child: Text(
-          //     'معرض الصور - رواندا',
-          //     textAlign: TextAlign.center,
-          //     style: TextStyle(
-          //       fontSize: 24,
-          //       fontWeight: FontWeight.bold,
-          //       color: themeProvider.primaryColor,
-          //     ),
-          //   ),
-          // ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: GridView.builder(
-                padding: const EdgeInsets.all(16.0),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12.0,
-                  mainAxisSpacing: 12.0,
-                  childAspectRatio: 0.8,
+          body: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: themeProvider.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                itemCount: galleryImages.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () => _openImage(context, index),
-                    child: Hero(
-                      tag: galleryImages[index],
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16.0),
-                        child: Stack(
-                          children: [
-                            Image.asset(
-                              galleryImages[index],
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                              cacheWidth: 400, // تحسين الجودة بالتحكم في الدقة
-                              cacheHeight: 300,
-                              filterQuality: FilterQuality.high, // تحسين الجودة
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      themeProvider.primaryColor,
-                                      themeProvider.secondaryColor,
-                                    ],
+                child: Text(
+                  languageProvider.galleryRwanda,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: themeProvider.primaryColor,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 12.0,
+                    mainAxisSpacing: 12.0,
+                    childAspectRatio: 0.8,
+                  ),
+                  itemCount: galleryImages.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () => _openImage(context, index),
+                      child: Hero(
+                        tag: galleryImages[index],
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12.0),
+                          child: Stack(
+                            children: [
+                              Image.asset(
+                                galleryImages[index],
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        themeProvider.primaryColor,
+                                        themeProvider.secondaryColor,
+                                      ],
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.photo,
+                                    size: 40,
+                                    color: Colors.white,
                                   ),
                                 ),
-                                child: const Icon(Icons.photo,
-                                    size: 40, color: Colors.white),
                               ),
-                            ),
-                            Positioned(
-                              bottom: 8,
-                              right: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  // ignore: deprecated_member_use
-                                  color: Colors.black.withOpacity(0.6),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  Icons.zoom_in,
-                                  color: Colors.white,
-                                  size: 16,
+                              Positioned(
+                                bottom: 8,
+                                right: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.6),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.zoom_in,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

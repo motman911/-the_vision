@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:the_vision/contact_page.dart';
 
 import 'theme_provider.dart';
+import 'l10n/language_provider.dart';
 import 'widgets.dart';
 
 class ServicesPage extends StatelessWidget {
@@ -10,112 +11,102 @@ class ServicesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
-    return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Container(
-            //   width: double.infinity,
-            //   padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            //   decoration: BoxDecoration(
-            //     // ignore: deprecated_member_use
-            //     color: themeProvider.primaryColor.withOpacity(0.1),
-            //     borderRadius: BorderRadius.circular(12),
-            //   ),
-            //   child: Text(
-            //     'خدماتنا',
-            //     textAlign: TextAlign.center,
-            //     style: TextStyle(
-            //       fontSize: 24,
-            //       fontWeight: FontWeight.bold,
-            //       color: themeProvider.primaryColor,
-            //     ),
-            //   ),
-            // ),
-            const SizedBox(height: 24),
-            ServiceCard(
-              title: 'خدمات التقديم',
-              description:
-                  'استشارة أكاديمية، اختيار التخصص والجامعة، تجهيز المستندات، متابعة القبول',
-              icon: Icons.description,
-              features: const [
-                'استشارة أكاديمية متخصصة',
-                'اختيار التخصص والجامعة المناسبة',
-                'معادلة الشهادة بالتعليم العالي',
-                'تجهيز الأوراق والمستندات المطلوبة',
-                'التقديم للجامعات ومتابعة القبول',
-              ],
-              themeProvider: themeProvider,
+    return Consumer2<ThemeProvider, LanguageProvider>(
+      builder: (context, themeProvider, languageProvider, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              languageProvider.services,
+              style: const TextStyle(color: Colors.white, fontSize: 18),
             ),
-            ServiceCard(
-              title: 'خدمات ما بعد القبول',
-              description:
-                  'استقبال من المطار، تأمين السكن، استخراج شريحة اتصال، المساعدة في الإقامة',
-              icon: Icons.home_work,
-              features: const [
-                'استقبال من المطار عند الوصول',
-                'استخراج شريحة اتصال محلية',
-                'استضافة لمدة يومين',
-                'المساعدة في توفير السكن المناسب',
-                'المساعدة в إجراءات الإقامة',
+            backgroundColor: themeProvider.primaryColor,
+            foregroundColor: Colors.white,
+            centerTitle: true,
+            elevation: 4,
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: themeProvider.primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    languageProvider.services,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: themeProvider.primaryColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildServiceCard(
+                  context,
+                  languageProvider.applyServices,
+                  languageProvider.isArabic
+                      ? 'استشارة أكاديمية، اختيار التخصص والجامعة، تجهيز المستندات، متابعة القبول'
+                      : 'Academic consultation, choosing major and university, document preparation, follow-up acceptance',
+                  Icons.description,
+                  themeProvider,
+                  languageProvider,
+                ),
+                _buildServiceCard(
+                  context,
+                  languageProvider.afterAcceptance,
+                  languageProvider.isArabic
+                      ? 'استقبال من المطار، تأمين السكن، استخراج شريحة اتصال، المساعدة في الإقامة'
+                      : 'Airport pickup, securing accommodation, obtaining SIM card, assistance with residency',
+                  Icons.home_work,
+                  themeProvider,
+                  languageProvider,
+                ),
+                _buildServiceCard(
+                  context,
+                  languageProvider.studentSupport,
+                  languageProvider.isArabic
+                      ? 'متابعة الطالب خلال فترة الدراسة، حل المشاكل الأكاديمية والإدارية'
+                      : 'Following up with the student during the study period, solving academic and administrative problems',
+                  Icons.school,
+                  themeProvider,
+                  languageProvider,
+                ),
+                const SizedBox(height: 24),
+                _buildProcessSteps(themeProvider, languageProvider),
+                const SizedBox(height: 24),
+                _buildLivingCosts(themeProvider, languageProvider),
+                const SizedBox(height: 24),
+                _buildRequiredDocuments(themeProvider, languageProvider),
+                const SizedBox(height: 24),
+                const Center(child: WhatsAppButton()),
+                const SizedBox(height: 24),
               ],
-              themeProvider: themeProvider,
             ),
-            ServiceCard(
-              title: 'خدمات دعم الطلاب',
-              description:
-                  'متابعة الطالب خلال فترة الدراسة، حل المشاكل الأكاديمية والإدارية',
-              icon: Icons.school,
-              features: const [
-                'متابعة الطالب خلال فترة الدراسة',
-                'حل المشاكل الأكاديمية والإدارية',
-                'توجيه للأنشطة الطلابية والثقافية',
-                'دعم في إجراءات تجديد الإقامة',
-                'دعم مستمر طوال فترة الدراسة',
-              ],
-              themeProvider: themeProvider,
-            ),
-            const SizedBox(height: 24),
-            ProcessSteps(themeProvider: themeProvider),
-            const SizedBox(height: 24),
-            LivingCosts(themeProvider: themeProvider),
-            const SizedBox(height: 24),
-            RequiredDocuments(themeProvider: themeProvider),
-            const SizedBox(height: 24),
-            const Center(child: WhatsAppButton()),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
-}
 
-class ServiceCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final IconData icon;
-  final List<String> features;
-  final ThemeProvider themeProvider;
+  Widget _buildServiceCard(
+    BuildContext context,
+    String title,
+    String description,
+    IconData icon,
+    ThemeProvider themeProvider,
+    LanguageProvider languageProvider,
+  ) {
+    final features = _getServiceFeatures(title, languageProvider);
 
-  const ServiceCard({
-    super.key,
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.features,
-    required this.themeProvider,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     return Card(
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 20),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -127,7 +118,7 @@ class ServiceCard extends StatelessWidget {
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: themeProvider.primaryColor,
                     ),
@@ -138,12 +129,14 @@ class ServiceCard extends StatelessWidget {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    // ignore: deprecated_member_use
                     color: themeProvider.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child:
-                      Icon(icon, size: 30, color: themeProvider.primaryColor),
+                  child: Icon(
+                    icon,
+                    size: 28,
+                    color: themeProvider.primaryColor,
+                  ),
                 ),
               ],
             ),
@@ -154,8 +147,9 @@ class ServiceCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'المميزات:',
+              languageProvider.isArabic ? 'المميزات:' : 'Features:',
               style: TextStyle(
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: themeProvider.primaryColor,
               ),
@@ -163,20 +157,20 @@ class ServiceCard extends StatelessWidget {
             const SizedBox(height: 8),
             ...features.map(
               (feature) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
                   children: [
+                    Icon(
+                      Icons.check_circle,
+                      size: 18,
+                      color: themeProvider.accentColor,
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         feature,
                         style: const TextStyle(fontSize: 14),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.check_circle,
-                      size: 18,
-                      color: themeProvider.accentColor,
                     ),
                   ],
                 ),
@@ -193,43 +187,133 @@ class ServiceCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: themeProvider.primaryColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 14,
-                ),
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.0),
+                  borderRadius: BorderRadius.circular(30),
                 ),
-                elevation: 4,
-                // ignore: deprecated_member_use
-                shadowColor: Colors.black.withOpacity(0.3),
               ),
-              child: const Text('اطلب الخدمة الآن'),
+              child: Text(
+                languageProvider.contactNow,
+                style: const TextStyle(fontSize: 16),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class ProcessSteps extends StatelessWidget {
-  final ThemeProvider themeProvider;
+  List<String> _getServiceFeatures(
+      String serviceType, LanguageProvider languageProvider) {
+    if (serviceType == languageProvider.applyServices) {
+      return languageProvider.isArabic
+          ? const [
+              'استشارة أكاديمية متخصصة',
+              'اختيار التخصص والجامعة المناسبة',
+              'معادلة الشهادة بالتعليم العالي',
+              'تجهيز الأوراق والمستندات المطلوبة',
+              'التقديم للجامعات ومتابعة القبول',
+            ]
+          : const [
+              'Specialized academic consultation',
+              'Choosing the right major and university',
+              'Certificate equivalency with higher education',
+              'Preparing required papers and documents',
+              'Applying to universities and follow-up acceptance',
+            ];
+    } else if (serviceType == languageProvider.afterAcceptance) {
+      return languageProvider.isArabic
+          ? const [
+              'استقبال من المطار عند الوصول',
+              'استخراج شريحة اتصال محلية',
+              'استضافة لمدة يومين',
+              'المساعدة في توفير السكن المناسب',
+              'المساعدة في إجراءات الإقامة',
+            ]
+          : const [
+              'Airport pickup upon arrival',
+              'Obtaining local SIM card',
+              'Two-day hosting',
+              'Assistance in providing suitable accommodation',
+              'Assistance with residency procedures',
+            ];
+    } else {
+      return languageProvider.isArabic
+          ? const [
+              'متابعة الطالب خلال فترة الدراسة',
+              'حل المشاكل الأكاديمية والإدارية',
+              'توجيه للأنشطة الطلابية والثقافية',
+              'دعم في إجراءات تجديد الإقامة',
+              'دعم مستمر طوال فترة الدراسة',
+            ]
+          : const [
+              'Following up with the student during the study period',
+              'Solving academic and administrative problems',
+              'Guidance for student and cultural activities',
+              'Support in residency renewal procedures',
+              'Continuous support throughout the study period',
+            ];
+    }
+  }
 
-  const ProcessSteps({super.key, required this.themeProvider});
+  Widget _buildProcessSteps(
+      ThemeProvider themeProvider, LanguageProvider languageProvider) {
+    final steps = [
+      {
+        'number': 1,
+        'title': languageProvider.isArabic
+            ? 'الاستشارة الأولية'
+            : 'Initial Consultation',
+        'description': languageProvider.isArabic
+            ? 'نبدأ باستشارة شاملة لفهم احتياجاتك الأكاديمية والمهنية ونساعدك في اختيار التخصص والجامعة المناسبة لمستقبلك'
+            : 'We start with a comprehensive consultation to understand your academic and professional needs and help you choose the right major and university for your future',
+      },
+      {
+        'number': 2,
+        'title': languageProvider.isArabic
+            ? 'تجهيز المستندات'
+            : 'Document Preparation',
+        'description': languageProvider.isArabic
+            ? 'نساعدك في تجهيز جميع المستندات المطلوبة وتصديقها من الجهات المختصة لضمان قبول طلبك في الجامعة'
+            : 'We help you prepare all required documents and certify them from the relevant authorities to ensure your application is accepted at the university',
+      },
+      {
+        'number': 3,
+        'title': languageProvider.isArabic
+            ? 'التقديم والمتابعة'
+            : 'Application and Follow-up',
+        'description': languageProvider.isArabic
+            ? 'نتولى عملية التقديم للجامعات والمتابعة المستمرة حتى حصولك على خطاب القبول الرسمي من الجامعة'
+            : 'We handle the application process to universities and continuous follow-up until you receive the official acceptance letter from the university',
+      },
+      {
+        'number': 4,
+        'title': languageProvider.isArabic
+            ? 'الاستعداد للسفر'
+            : 'Travel Preparation',
+        'description': languageProvider.isArabic
+            ? 'نساعدك في استكمال إجراءات السفر والتأشيرة ونوفر لك دليلاً شاملاً للاستعداد للحياة الدراسية في رواندا'
+            : 'We help you complete travel and visa procedures and provide you with a comprehensive guide to prepare for student life in Rwanda',
+      },
+      {
+        'number': 5,
+        'title':
+            languageProvider.isArabic ? 'الدعم المستمر' : 'Continuous Support',
+        'description': languageProvider.isArabic
+            ? 'نبقى على تواصل معك خلال رحلتك الدراسية ونقدم الدعم اللازم لحل أي تحديات قد تواجهك خلال الدراسة'
+            : 'We stay in touch with you during your study journey and provide the necessary support to solve any challenges you may face during your studies',
+      },
+    ];
 
-  @override
-  Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'خطوات التقديم',
+              languageProvider.isArabic ? 'خطوات التقديم' : 'Application Steps',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -237,48 +321,22 @@ class ProcessSteps extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildStep(
-                1,
-                'الاستشارة الأولية',
-                'نبدأ باستشارة شاملة لفهم احتياجاتك الأكاديمية والمهنية ونساعدك في اختيار التخصص والجامعة المناسبة لمستقبلك',
-                themeProvider),
-            _buildStep(
-                2,
-                'تجهيز المستندات',
-                'نساعدك في تجهيز جميع المستندات المطلوبة وتصديقها من الجهات المختصة لضمان قبول طلبك في الجامعة',
-                themeProvider),
-            _buildStep(
-                3,
-                'التقديم والمتابعة',
-                'نتولى عملية التقديم للجامعات والمتابعة المستمرة حتى حصولك على خطاب القبول الرسمي من الجامعة',
-                themeProvider),
-            _buildStep(
-                4,
-                'الاستعداد للسفر',
-                'نساعدك في استكمال إجراءات السفر والتأشيرة ونوفر لك دليلاً شاملاً للاستعداد للحياة الدراسية في رواندا',
-                themeProvider),
-            _buildStep(
-                5,
-                'الدعم المستمر',
-                'نبقى على تواصل معك خلال رحلتك الدراسية ونقدم الدعم اللازم لحل أي تحديات قد تواجهك خلال الدراسة',
-                themeProvider),
+            ...steps.map((step) => _buildStep(step, themeProvider)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStep(int number, String title, String description,
-      ThemeProvider themeProvider) {
+  Widget _buildStep(Map<String, dynamic> step, ThemeProvider themeProvider) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12.0),
-      padding: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: themeProvider.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.grey.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -292,15 +350,15 @@ class ProcessSteps extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  step['title'] as String,
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  description,
+                  step['description'] as String,
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],
@@ -316,7 +374,7 @@ class ProcessSteps extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                number.toString(),
+                step['number'].toString(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -329,35 +387,53 @@ class ProcessSteps extends StatelessWidget {
       ),
     );
   }
-}
 
-class LivingCosts extends StatelessWidget {
-  final ThemeProvider themeProvider;
+  Widget _buildLivingCosts(
+      ThemeProvider themeProvider, LanguageProvider languageProvider) {
+    final List<Map<String, dynamic>> costs = [
+      {
+        'title': languageProvider.singleRoom,
+        'cost': '100 - 150',
+        'icon': Icons.home,
+      },
+      {
+        'title': languageProvider.sharedRoom,
+        'cost': '50 - 80',
+        'icon': Icons.people,
+      },
+      {
+        'title': languageProvider.monthlyLiving,
+        'cost': '70 - 90',
+        'icon': Icons.restaurant,
+      },
+      {
+        'title': languageProvider.transportation,
+        'cost': '20 - 30',
+        'icon': Icons.directions_bus,
+      },
+    ];
 
-  const LivingCosts({super.key, required this.themeProvider});
-
-  @override
-  Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'تفاصيل السكن والمعيشة',
+              languageProvider.livingCosts,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: themeProvider.primaryColor,
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'نقدم لك معلومات شاملة عن تكاليف المعيشة في رواندا لمساعدتك في التخطيط لميزانيتك',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+            const SizedBox(height: 12),
+            Text(
+              languageProvider.isArabic
+                  ? 'نقدم لك معلومات شاملة عن تكاليف المعيشة في رواندا لمساعدتك في التخطيط لميزانيتك'
+                  : 'We provide you with comprehensive information about living costs in Rwanda to help you plan your budget',
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 20),
             GridView.count(
@@ -366,17 +442,55 @@ class LivingCosts extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               childAspectRatio: 0.9,
               crossAxisSpacing: 10,
-              mainAxisSpacing: 20,
-              children: [
-                _buildCostCard('السكن الفردي', '100 - 150', 'دولار/شهر',
-                    Icons.home, themeProvider),
-                _buildCostCard('السكن المشترك', '50 - 80', 'دولار/شهر',
-                    Icons.people, themeProvider),
-                _buildCostCard('الإعاشة الشهرية', '70 - 90', 'دولار/شهر',
-                    Icons.restaurant, themeProvider),
-                _buildCostCard('المواصلات', '20 - 30', 'دولار/شهر',
-                    Icons.directions_bus, themeProvider),
-              ],
+              mainAxisSpacing: 10,
+              children: costs.map((item) {
+                return Card(
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          item['icon'] as IconData,
+                          size: 32,
+                          color: themeProvider.primaryColor,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          item['title'] as String,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        RichText(
+                          text: TextSpan(
+                            text: item['cost'] as String,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: themeProvider.accentColor,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: ' ${languageProvider.dollarPerMonth}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 30),
             Container(
@@ -385,26 +499,29 @@ class LivingCosts extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     themeProvider.primaryColor,
-                    themeProvider.secondaryColor
+                    themeProvider.secondaryColor,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Expanded(
                     child: Text(
-                      'الفيزا مجانية عند الوصول مع القبول الجامعي',
-                      style: TextStyle(
+                      languageProvider.isArabic
+                          ? 'الفيزا مجانية عند الوصول مع القبول الجامعي'
+                          : 'Visa is free upon arrival with university acceptance',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
                     ),
                   ),
-                  SizedBox(width: 12),
-                  Icon(Icons.info, color: Colors.white),
+                  const SizedBox(width: 12),
+                  const Icon(Icons.info, color: Colors.white),
                 ],
               ),
             ),
@@ -414,68 +531,46 @@ class LivingCosts extends StatelessWidget {
     );
   }
 
-  Widget _buildCostCard(String title, String cost, String unit, IconData icon,
-      ThemeProvider themeProvider) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 32, color: themeProvider.primaryColor),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            RichText(
-              text: TextSpan(
-                text: cost,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: themeProvider.accentColor,
-                ),
-                children: [
-                  TextSpan(
-                    text: ' $unit',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+  Widget _buildRequiredDocuments(
+      ThemeProvider themeProvider, LanguageProvider languageProvider) {
+    final documents = [
+      {
+        'text': languageProvider.isArabic
+            ? 'شهادة الثانوية العامة (مترجمة للإنجليزية)'
+            : 'High school certificate (translated to English)',
+        'icon': Icons.assignment,
+      },
+      {
+        'text': languageProvider.isArabic
+            ? 'صورة جواز السفر ساري المفعول'
+            : 'Valid passport copy',
+        'icon': Icons.credit_card,
+      },
+      {
+        'text': languageProvider.isArabic
+            ? 'صور شخصية حديثة'
+            : 'Recent personal photos',
+        'icon': Icons.photo,
+      },
+      {
+        'text': languageProvider.isArabic
+            ? 'كشف الدرجات (إن وجد)'
+            : 'Transcript (if available)',
+        'icon': Icons.description,
+      },
+    ];
 
-class RequiredDocuments extends StatelessWidget {
-  final ThemeProvider themeProvider;
-
-  const RequiredDocuments({super.key, required this.themeProvider});
-
-  @override
-  Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'المستندات المطلوبة',
+              languageProvider.isArabic
+                  ? 'المستندات المطلوبة'
+                  : 'Required Documents',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -483,13 +578,11 @@ class RequiredDocuments extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildDocumentItem('شهادة الثانوية العامة (مترجمة للإنجليزية)',
-                Icons.assignment, themeProvider),
-            _buildDocumentItem('صورة جواز السفر ساري المفعول',
-                Icons.credit_card, themeProvider),
-            _buildDocumentItem('صور شخصية حديثة', Icons.photo, themeProvider),
-            _buildDocumentItem(
-                'كشف الدرجات (إن وجد)', Icons.description, themeProvider),
+            ...documents.map((doc) => _buildDocumentItem(
+                  doc['text'] as String,
+                  doc['icon'] as IconData,
+                  themeProvider,
+                )),
           ],
         ),
       ),
@@ -506,7 +599,6 @@ class RequiredDocuments extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.grey.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -515,7 +607,12 @@ class RequiredDocuments extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(child: Text(text)),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
           const SizedBox(width: 16),
           Icon(icon, color: themeProvider.primaryColor),
         ],

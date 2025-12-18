@@ -6,8 +6,10 @@ import 'splash_screen.dart';
 // ignore: unused_import
 import 'home_screen.dart';
 import 'theme_provider.dart';
+import 'l10n/language_provider.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const TheVisionApp());
 }
 
@@ -16,14 +18,18 @@ class TheVisionApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
+      ],
+      child: Consumer2<ThemeProvider, LanguageProvider>(
+        builder: (context, themeProvider, languageProvider, child) {
           return MaterialApp(
-            title: 'مكتب الرؤية - الدراسة في رواندا',
+            title: languageProvider.appTitle,
             theme: themeProvider.currentThemeData,
             debugShowCheckedModeBanner: false,
+            locale: languageProvider.currentLocale,
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
@@ -33,10 +39,11 @@ class TheVisionApp extends StatelessWidget {
               Locale('ar', 'AE'),
               Locale('en', 'US'),
             ],
-            locale: const Locale('ar', 'AE'),
             builder: (context, child) {
               return Directionality(
-                textDirection: TextDirection.rtl,
+                textDirection: languageProvider.isArabic
+                    ? TextDirection.rtl
+                    : TextDirection.ltr,
                 child: child!,
               );
             },
