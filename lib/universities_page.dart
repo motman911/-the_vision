@@ -16,16 +16,7 @@ class UniversitiesPage extends StatelessWidget {
     return Consumer2<ThemeProvider, LanguageProvider>(
       builder: (context, themeProvider, languageProvider, child) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              languageProvider.universities,
-              style: const TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            backgroundColor: themeProvider.primaryColor,
-            foregroundColor: Colors.white,
-            centerTitle: true,
-            elevation: 4,
-          ),
+         
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
