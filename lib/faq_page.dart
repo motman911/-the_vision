@@ -12,37 +12,9 @@ class FAQPage extends StatelessWidget {
     return Consumer2<ThemeProvider, LanguageProvider>(
       builder: (context, themeProvider, languageProvider, child) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              languageProvider.faq,
-              style: const TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            backgroundColor: themeProvider.primaryColor,
-            foregroundColor: Colors.white,
-            centerTitle: true,
-            elevation: 4,
-          ),
           body: Column(
             children: [
-              Container(
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: themeProvider.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  languageProvider.faq,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: themeProvider.primaryColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16.0),
