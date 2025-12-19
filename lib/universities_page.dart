@@ -28,8 +28,8 @@ class UniversitiesPage extends StatelessWidget {
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
-            // child: Column(
-            //   children: [
+            child: Column(
+              children: [
             //     Container(
             //       width: double.infinity,
             //       padding:
