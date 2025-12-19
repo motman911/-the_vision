@@ -28,27 +28,27 @@ class UniversitiesPage extends StatelessWidget {
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: themeProvider.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    languageProvider.famousUniversities,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: themeProvider.primaryColor,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
+            // child: Column(
+            //   children: [
+            //     Container(
+            //       width: double.infinity,
+            //       padding:
+            //           const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            //       decoration: BoxDecoration(
+            //         color: themeProvider.primaryColor.withOpacity(0.1),
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //       child: Text(
+            //         languageProvider.famousUniversities,
+            //         textAlign: TextAlign.center,
+            //         style: TextStyle(
+            //           fontSize: 22,
+            //           fontWeight: FontWeight.bold,
+            //           color: themeProvider.primaryColor,
+            //         ),
+            //       ),
+            //     ),
+            //     const SizedBox(height: 24),
                 UniversityCard(
                   name: 'Kigali Independent University (ULK)',
                   description: languageProvider.isArabic
