@@ -1,5 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'theme_provider.dart';
 import 'l10n/language_provider.dart';
 
@@ -8,17 +13,19 @@ class SettingsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final languageProvider =
-        Provider.of<LanguageProvider>(context, listen: false);
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Dialog(
       backgroundColor: themeProvider.cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
+      elevation: 10,
+      insetPadding: const EdgeInsets.all(20),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
+        constraints: const BoxConstraints(maxWidth: 400),
         child: Directionality(
           textDirection:
               languageProvider.isArabic ? TextDirection.rtl : TextDirection.ltr,
@@ -26,79 +33,126 @@ class SettingsDialog extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  languageProvider.settings,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: themeProvider.textColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+                // العنوان
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: themeProvider.primaryColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.settings,
+                          color: themeProvider.primaryColor, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      languageProvider.settings,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: themeProvider.textColor,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
-                // قسم اللغة
+                // 1️⃣ قسم اللغة
                 _buildSectionTitle(
-                  context,
                   languageProvider.languageText,
                   Icons.language,
+                  themeProvider,
                 ),
-                _buildLanguageOption(context, 'العربية', 'ar', Icons.language),
-                _buildLanguageOption(context, 'English', 'en', Icons.translate),
+                const SizedBox(height: 8),
+                _buildLanguageOption(
+                    context, 'العربية', const Locale('ar'), Icons.language),
+                _buildLanguageOption(
+                    context, 'English', const Locale('en'), Icons.translate),
 
-                const SizedBox(height: 20),
+                const Divider(height: 30),
 
-                // قسم السمة
+                // 2️⃣ قسم السمة (الألوان)
                 _buildSectionTitle(
-                  context,
                   languageProvider.themeText,
                   Icons.palette,
+                  themeProvider,
                 ),
-                _buildThemeOption(
-                  context,
-                  languageProvider.lightTheme,
-                  AppTheme.light,
-                  Icons.light_mode,
-                ),
-                _buildThemeOption(
-                  context,
-                  languageProvider.darkTheme,
-                  AppTheme.dark,
-                  Icons.dark_mode,
-                ),
-                _buildThemeOption(
-                  context,
-                  languageProvider.blueTheme,
-                  AppTheme.blue,
-                  Icons.water_drop,
-                ),
-                _buildThemeOption(
-                  context,
-                  languageProvider.greenTheme,
-                  AppTheme.green,
-                  Icons.nature,
-                ),
-                _buildThemeOption(
-                  context,
-                  languageProvider.orangeTheme,
-                  AppTheme.orange,
-                  Icons.brightness_auto,
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _buildColorCircle(
+                        context, AppTheme.light, const Color(0xFF0f766e)),
+                    _buildColorCircle(
+                        context, AppTheme.blue, const Color(0xFF1e40af)),
+                    _buildColorCircle(
+                        context, AppTheme.green, const Color(0xFF15803d)),
+                    _buildColorCircle(
+                        context, AppTheme.orange, const Color(0xFFea580c)),
+                    _buildColorCircle(
+                        context, AppTheme.dark, const Color(0xFF1a1a1a),
+                        isDark: true),
+                  ],
                 ),
 
-                const SizedBox(height: 20),
+                const Divider(height: 30),
 
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: themeProvider.primaryColor,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                // 3️⃣ أدوات إضافية
+                _buildActionTile(
+                  context,
+                  title: languageProvider.isArabic
+                      ? 'مشاركة التطبيق'
+                      : 'Share App',
+                  icon: Icons.share,
+                  color: Colors.blue,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Share.share(languageProvider.isArabic
+                        ? 'حمل تطبيق مكتب الرؤية للدراسة في رواندا الآن! 🇷🇼🎓\nhttps://your-app-link.com'
+                        : 'Download The Vision app for studying in Rwanda now! 🇷🇼🎓\nhttps://your-app-link.com');
+                  },
+                  themeProvider: themeProvider,
+                ),
+                _buildActionTile(
+                  context,
+                  title: languageProvider.isArabic
+                      ? 'سياسة الخصوصية'
+                      : 'Privacy Policy',
+                  icon: Icons.privacy_tip_outlined,
+                  color: Colors.grey,
+                  onTap: () async {
+                    const url = 'https://google.com'; // ضع رابطك هنا
+                    if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(Uri.parse(url));
+                    }
+                  },
+                  themeProvider: themeProvider,
+                ),
+
+                const SizedBox(height: 24),
+
+                // زر الإغلاق
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeProvider.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
                     ),
-                  ),
-                  child: Text(
-                    languageProvider.isArabic ? 'إغلاق' : 'Close',
-                    style: const TextStyle(fontSize: 16),
+                    child: Text(
+                      languageProvider.isArabic ? 'إغلاق' : 'Close',
+                      style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
                   ),
                 ),
               ],
@@ -109,113 +163,124 @@ class SettingsDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(
-    BuildContext context,
-    String title,
-    IconData icon,
-  ) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+  // --- Widgets ---
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            color: themeProvider.primaryColor,
-            size: 20,
+  Widget _buildSectionTitle(String title, IconData icon, ThemeProvider theme) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: theme.subTextColor),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: theme.subTextColor,
           ),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              color: themeProvider.primaryColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildLanguageOption(
-    BuildContext context,
-    String title,
-    String languageCode,
-    IconData icon,
-  ) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final languageProvider = Provider.of<LanguageProvider>(context);
+      BuildContext context, String title, Locale locale, IconData icon) {
+    final theme = Provider.of<ThemeProvider>(context);
+    final lang = Provider.of<LanguageProvider>(context);
+    final isSelected = lang.locale.languageCode == locale.languageCode;
 
-    bool isSelected = languageCode == 'ar'
-        ? languageProvider.isArabic
-        : !languageProvider.isArabic;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
-        leading: Icon(icon, color: themeProvider.textColor),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 15,
-            color: themeProvider.textColor,
-          ),
+    return InkWell(
+      onTap: () => lang.changeLanguage(locale),
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.primaryColor.withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: isSelected
+              ? Border.all(color: theme.primaryColor.withOpacity(0.5))
+              : Border.all(color: Colors.transparent),
         ),
-        trailing: isSelected
-            ? Icon(Icons.check, color: themeProvider.primaryColor)
-            : null,
-        onTap: () {
-          languageProvider.setLanguage(languageCode);
-          Navigator.pop(context);
-        },
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+        child: Row(
+          children: [
+            Icon(icon,
+                color: isSelected ? theme.primaryColor : theme.textColor),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? theme.primaryColor : theme.textColor,
+                ),
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle, color: theme.primaryColor, size: 20),
+          ],
         ),
-        tileColor: themeProvider.surfaceColor,
       ),
     );
   }
 
-  Widget _buildThemeOption(
-    BuildContext context,
-    String title,
-    AppTheme theme,
-    IconData icon,
-  ) {
+  Widget _buildColorCircle(
+      BuildContext context, AppTheme themeEnum, Color color,
+      {bool isDark = false}) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final isSelected = themeProvider.currentTheme == theme;
+    final isSelected = themeProvider.currentTheme == themeEnum;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
-        leading: Icon(
-          icon,
-          color:
-              isSelected ? themeProvider.primaryColor : themeProvider.textColor,
+    return GestureDetector(
+      onTap: () => themeProvider.setTheme(themeEnum),
+      child: Container(
+        width: 45,
+        height: 45,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: isSelected
+              ? Border.all(
+                  color: themeProvider.textColor, width: 3) // إطار للاختيار
+              : null,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            )
+          ],
         ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 15,
-            color: isSelected
-                ? themeProvider.primaryColor
-                : themeProvider.textColor,
-          ),
-        ),
-        trailing: isSelected
-            ? Icon(Icons.check, color: themeProvider.primaryColor)
+        child: isSelected
+            ? const Icon(Icons.check, color: Colors.white, size: 24)
             : null,
-        onTap: () {
-          themeProvider.setTheme(theme);
-          Navigator.pop(context);
-        },
-        shape: RoundedRectangleBorder(
+      ),
+    );
+  }
+
+  Widget _buildActionTile(BuildContext context,
+      {required String title,
+      required IconData icon,
+      required Color color,
+      required VoidCallback onTap,
+      required ThemeProvider themeProvider}) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
         ),
-        tileColor: themeProvider.surfaceColor,
+        child: Icon(icon, color: color, size: 20),
       ),
+      title: Text(
+        title,
+        style: TextStyle(color: themeProvider.textColor, fontSize: 15),
+      ),
+      trailing: Icon(Icons.arrow_forward_ios,
+          size: 14, color: themeProvider.subTextColor),
+      onTap: onTap,
     );
   }
 }

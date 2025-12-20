@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,150 +13,190 @@ class FAQPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<ThemeProvider, LanguageProvider>(
       builder: (context, themeProvider, languageProvider, child) {
+        final faqs = _getFAQs(languageProvider);
+
         return Scaffold(
-          body: Column(
-            children: [
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: faqItems(languageProvider).length,
-                  itemBuilder: (context, index) {
-                    return FAQItem(
-                      question: faqItems(languageProvider)[index]['question']!,
-                      answer: faqItems(languageProvider)[index]['answer']!,
-                      themeProvider: themeProvider,
-                    );
-                  },
-                ),
+          backgroundColor: themeProvider.scaffoldBackgroundColor,
+          appBar: AppBar(
+            title: Text(languageProvider.faq),
+            centerTitle: true,
+            backgroundColor: themeProvider.primaryColor,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(
+                languageProvider.isArabic
+                    ? Icons.arrow_back_ios
+                    : Icons.arrow_back_ios_new,
+                color: Colors.white,
               ),
-            ],
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          body: ListView.builder(
+            padding: const EdgeInsets.all(20.0),
+            itemCount: faqs.length,
+            itemBuilder: (context, index) {
+              return _buildFAQCard(
+                faqs[index]['question']!,
+                faqs[index]['answer']!,
+                themeProvider,
+              );
+            },
           ),
         );
       },
     );
   }
-}
 
-class FAQItem extends StatelessWidget {
-  final String question;
-  final String answer;
-  final ThemeProvider themeProvider;
-
-  const FAQItem({
-    super.key,
-    required this.question,
-    required this.answer,
-    required this.themeProvider,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
+  Widget _buildFAQCard(String question, String answer, ThemeProvider theme) {
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      child: ExpansionTile(
-        title: Text(
-          question,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: themeProvider.primaryColor,
-          ),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              answer,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      child: Theme(
+        // إزالة الخطوط الفاصلة الافتراضية
+        data: ThemeData().copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          iconColor: theme.primaryColor,
+          collapsedIconColor: theme.primaryColor,
+          leading: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.question_answer_rounded,
+                color: theme.primaryColor, size: 20),
+          ),
+          title: Text(
+            question,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: theme.textColor,
+            ),
+          ),
+          childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                answer,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: theme.textColor.withOpacity(0.8),
+                  height: 1.6,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
-}
 
-List<Map<String, String>> faqItems(LanguageProvider languageProvider) {
-  if (languageProvider.isArabic) {
-    return [
-      {
-        'question': 'ما هي مدة الدراسة في رواندا؟',
-        'answer':
-            'مدة الدراسة في رواندا تختلف حسب المرحلة الدراسية والتخصص، فمدة البكالوريوس تتراوح بين 3-4 سنوات، والماجستير من 1-2 سنوات، والدكتوراه من 3-5 سنوات.',
-      },
-      {
-        'question': 'ما هي لغة الدراسة في رواندا؟',
-        'answer':
-            'اللغة الإنجليزية هي لغة الدراسة الرئيسية في معظم الجامعات الرواندية، مع وجود بعض البرامج باللغة الفرنسية في بعض الجامعات.',
-      },
-      {
-        'question': 'هل تحتاج إلى فيزا للدراسة في رواندا؟',
-        'answer':
-            'نعم، يحتاج الطلاب الدوليون إلى الحصول على فيزا دراسة للدخول إلى رواندا، ويمكننا مساعدتك في استخراجها.',
-      },
-      {
-        'question': 'ما هي تكاليف الدراسة في رواندا؟',
-        'answer':
-            'تتراوح تكاليف الدراسة بين 500-2000 دولار أمريكي سنوياً حسب الجامعة والتخصص، وتعتبر مناسبة مقارنة بجودة التعليم المقدمة.',
-      },
-      {
-        'question': 'هل يمكن العمل أثناء الدراسة في رواندا؟',
-        'answer':
-            'نعم، يسمح للطلاب الدوليين بالعمل بدوام جزئي أثناء الدراسة، بحد أقصى 20 ساعة أسبوعياً.',
-      },
-      {
-        'question': 'ما هي مدة الحصول على القبول الجامعي؟',
-        'answer':
-            'عادةً ما تستغرق عملية الحصول على القبول ما بين 2-6 أيام بعد اكتمال المستندات. نضمن لك الحصول على رد من الجامعات في أسرع وقت ممكن.',
-      },
-      {
-        'question': 'هل أحتاج لشهادة لغة للدراسة في رواندا؟',
-        'answer':
-            'معظم البرامج الدراسية في رواندا باللغة الإنجليزية. بعض الجامعات قد تتطلب شهادة لغة (مثل IELTS أو TOEFL)، لكن العديد منها يقبل الطلاب بدونها مع إجراء مقابلة تقييمية.',
-      },
-    ];
-  } else {
-    return [
-      {
-        'question': 'What is the duration of study in Rwanda?',
-        'answer':
-            'The duration of study in Rwanda varies according to the study level and specialization. Bachelor\'s degree ranges from 3-4 years, Master\'s from 1-2 years, and PhD from 3-5 years.',
-      },
-      {
-        'question': 'What is the language of study in Rwanda?',
-        'answer':
-            'English is the main language of study in most Rwandan universities, with some programs in French in some universities.',
-      },
-      {
-        'question': 'Do you need a visa to study in Rwanda?',
-        'answer':
-            'Yes, international students need to obtain a study visa to enter Rwanda, and we can help you obtain it.',
-      },
-      {
-        'question': 'What are the study costs in Rwanda?',
-        'answer':
-            'Study costs range between 500-2000 US dollars annually depending on the university and specialization, and are considered reasonable compared to the quality of education provided.',
-      },
-      {
-        'question': 'Can I work while studying in Rwanda?',
-        'answer':
-            'Yes, international students are allowed to work part-time while studying, with a maximum of 20 hours per week.',
-      },
-      {
-        'question': 'How long does it take to get university acceptance?',
-        'answer':
-            'The acceptance process usually takes between 2-6 days after completing the documents. We guarantee you a response from universities as soon as possible.',
-      },
-      {
-        'question': 'Do I need a language certificate to study in Rwanda?',
-        'answer':
-            'Most study programs in Rwanda are in English. Some universities may require a language certificate (such as IELTS or TOEFL), but many accept students without it with an assessment interview.',
-      },
-    ];
+  // ✅ قائمة الأسئلة (بيانات)
+  List<Map<String, String>> _getFAQs(LanguageProvider lang) {
+    if (lang.isArabic) {
+      return [
+        {
+          'question': 'ما هي مدة الدراسة في رواندا؟',
+          'answer':
+              'مدة الدراسة تختلف حسب المرحلة:\n• البكالوريوس: 3-4 سنوات\n• الماجستير: 1-2 سنة\n• الدكتوراه: 3-5 سنوات',
+        },
+        {
+          'question': 'ما هي لغة الدراسة؟',
+          'answer':
+              'اللغة الإنجليزية هي اللغة الرسمية والأساسية في معظم الجامعات الرواندية، مع توفر بعض البرامج باللغة الفرنسية.',
+        },
+        {
+          'question': 'هل أحتاج إلى فيزا مسبقة؟',
+          'answer':
+              'لا، الطلاب من معظم الدول يحصلون على تأشيرة الدخول عند الوصول إلى المطار (Visa on Arrival). بعد ذلك، نقوم بمساعدتك في تحويلها إلى إقامة طلابية سنوية.',
+        },
+        {
+          'question': 'كم تكلفة الدراسة والمعيشة؟',
+          'answer':
+              '• الرسوم الدراسية: تتراوح غالباً بين 500 إلى 2000 دولار سنوياً.\n• المعيشة: متوسط مصروف الطالب (سكن + أكل) يتراوح بين 150 إلى 250 دولار شهرياً.',
+        },
+        {
+          'question': 'هل يمكنني العمل أثناء الدراسة؟',
+          'answer':
+              'نعم، قانونياً يُسمح للطلاب الدوليين بالعمل بدوام جزئي (20 ساعة أسبوعياً) خلال فترة الدراسة.',
+        },
+        {
+          'question': 'كم يستغرق الحصول على القبول؟',
+          'answer':
+              'عادة ما نستخرج القبول المبدئي (Offer Letter) خلال 2-6 أيام عمل بعد اكتمال المستندات ودفع رسوم التسجيل.',
+        },
+        {
+          'question': 'هل شهادة اللغة (IELTS/TOEFL) مطلوبة؟',
+          'answer':
+              'في الغالب لا. معظم الجامعات تكتفي باختبار تحديد مستوى بسيط للغة الإنجليزية عند الوصول، أو مقابلة شخصية.',
+        },
+        {
+          'question': 'هل الشهادات معترف بها؟',
+          'answer':
+              'نعم، الجامعات الرواندية معترف بها من قبل وزارة التعليم العالي الرواندية، وشهاداتها مقبولة عالمياً وفي معظم الدول العربية.',
+        },
+      ];
+    } else {
+      return [
+        {
+          'question': 'Duration of study in Rwanda?',
+          'answer':
+              'It varies by level:\n• Bachelor\'s: 3-4 years\n• Master\'s: 1-2 years\n• PhD: 3-5 years',
+        },
+        {
+          'question': 'Language of instruction?',
+          'answer':
+              'English is the main official language in most universities, with some programs available in French.',
+        },
+        {
+          'question': 'Do I need a visa beforehand?',
+          'answer':
+              'No, most students get a Visa on Arrival. We will assist you later in converting it to a Student Permit.',
+        },
+        {
+          'question': 'How much does it cost?',
+          'answer':
+              '• Tuition: Ranges from \$500 to \$2000 per year.\n• Living: Average monthly cost (Housing + Food) is \$150 - \$250.',
+        },
+        {
+          'question': 'Can I work while studying?',
+          'answer':
+              'Yes, international students are legally allowed to work part-time (20 hours/week) during their studies.',
+        },
+        {
+          'question': 'How long for admission?',
+          'answer':
+              'We usually secure the preliminary admission offer within 2-6 business days after document submission.',
+        },
+        {
+          'question': 'Is IELTS/TOEFL required?',
+          'answer':
+              'Mostly No. Universities usually conduct a simple placement test or interview upon arrival.',
+        },
+        {
+          'question': 'Are degrees recognized?',
+          'answer':
+              'Yes, Rwandan universities are accredited by the Ministry of Education and recognized globally.',
+        },
+      ];
+    }
   }
 }

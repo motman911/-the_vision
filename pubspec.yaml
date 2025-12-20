@@ -11,7 +11,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+
+  flutter_dotenv: ^5.1.0
+  google_fonts: ^6.1.0
+  share_plus: ^7.2.1
+
   # State Management & Providers
   provider: ^6.1.1
   shared_preferences: ^2.1.1
@@ -42,33 +46,22 @@ dependencies:
   
   # Performance
   flutter_cache_manager: ^3.3.3
-  
-  # Environment variables - استخدم إصداراً متوافقاً
-
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
-
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: "assets/images/logo_P1.png"
+  flutter_lints: ^3.0.0
+  # 👇 مكتبة توليد الأيقونات
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
-
   assets:
-    - assets/icons/
-    - assets/fonts/
+    # ✅ إضافة ملف البيئة للأصول
+    - .env
     
-    # Logos
-    - assets/images/logo_P1.png
-    - assets/images/logo_P2.png
-    - assets/images/logo_P3.png
-    
-    # Main Images
+    # Images
+    - assets/images/
     - assets/images/The_Vision_P1.jpg
     - assets/images/The_Vision_P2.jpg
     - assets/images/In_Rwanda_1.jpg
@@ -112,19 +105,13 @@ flutter:
     # UR University Images
     - assets/images/UR_P1.jpeg
     - assets/images/UR_P2.jpeg
-    - assets/images/UR_P3.jpeg
     - assets/images/UR_P4.jpg
     - assets/images/UR_P5.jpg
     - assets/images/UR_P6.jpg
 
-  fonts:
-    - family: Cairo
-      fonts:
-        - asset: assets/fonts/Cairo-Regular.ttf
-        - asset: assets/fonts/Cairo-Bold.ttf
-          weight: 700
-    - family: Tajawal
-      fonts:
-        - asset: assets/fonts/Tajawal-Regular.ttf
-        - asset: assets/fonts/Tajawal-Bold.ttf
-          weight: 700
+# 👇 إعدادات توليد الأيقونة
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/icon.png" # ⚠️ تأكد من وضع صورة اللوجو بهذا الاسم
+  min_sdk_android: 21

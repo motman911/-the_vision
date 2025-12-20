@@ -42,10 +42,17 @@ class ThemeProvider with ChangeNotifier {
     try {
       await _prefs.setInt(_themeKey, theme.index);
     } catch (e) {
-      // ignore: avoid_print
-      print('Error saving theme: $e');
+      debugPrint('Error saving theme: $e');
     }
     notifyListeners();
+  }
+
+  void toggleTheme() {
+    if (_currentTheme == AppTheme.dark) {
+      setTheme(AppTheme.light);
+    } else {
+      setTheme(AppTheme.dark);
+    }
   }
 
   ThemeData get currentThemeData {
@@ -68,119 +75,119 @@ class ThemeProvider with ChangeNotifier {
     }
   }
 
-  // الثيم الفاتح (الإفتراضي)
+  // --- تعريفات الثيمات (تم تحديث الألوان هنا) ---
+
+  // ✅ الثيم الفاتح (تم تحسين الخلفية لتبدو Premium)
   static final ThemeData lightTheme = ThemeData(
-    primaryColor: const Color(0xFF0f766e),
+    primaryColor: const Color(0xFF0f766e), // Teal
     colorScheme: ColorScheme.fromSwatch().copyWith(
+      primary: const Color(0xFF0f766e),
       secondary: const Color(0xFF14b8a6),
-      surface: const Color(0xFFf8fafc),
+      surface: const Color(0xFFF1F5F9), // Slate 100 (بدلاً من الأبيض الصريح)
     ),
     fontFamily: 'Cairo',
     useMaterial3: true,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: const Color(0xFFf8fafc),
+    scaffoldBackgroundColor: const Color(0xFFF1F5F9), // Slate 100
     cardColor: Colors.white,
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF0f766e),
       foregroundColor: Colors.white,
-      elevation: 4,
+      elevation: 0, // إلغاء الظل القديم للـ AppBar ليكون مسطحاً وعصرياً
+      centerTitle: true,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
+      selectedItemColor: Color(0xFF0f766e),
+      unselectedItemColor: Color(0xFF94A3B8), // Slate 400
     ),
   );
 
-  // الثيم الداكن
   static final ThemeData darkTheme = ThemeData(
     primaryColor: const Color(0xFF14b8a6),
-    colorScheme: ColorScheme.fromSwatch(
-      brightness: Brightness.dark,
-    ).copyWith(
+    colorScheme: ColorScheme.fromSwatch(brightness: Brightness.dark).copyWith(
+      primary: const Color(0xFF14b8a6),
       secondary: const Color(0xFF0f766e),
-      surface: const Color(0xFF1a1a1a),
+      surface: const Color(0xFF1e293b), // Slate 800
     ),
     fontFamily: 'Cairo',
     useMaterial3: true,
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: const Color(0xFF121212),
-    cardColor: const Color(0xFF1a1a1a),
+    scaffoldBackgroundColor:
+        const Color(0xFF0F172A), // Slate 900 (فخم جداً للداكن)
+    cardColor: const Color(0xFF1e293b), // Slate 800
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF14b8a6),
+      backgroundColor: Color(0xFF1e293b),
       foregroundColor: Colors.white,
-      elevation: 4,
+      elevation: 0,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Color(0xFF1a1a1a),
+      backgroundColor: Color(0xFF1e293b),
+      selectedItemColor: Color(0xFF14b8a6),
+      unselectedItemColor: Colors.grey,
     ),
   );
 
-  // الثيم الأزرق
+  // بقية الثيمات (أزرق، أخضر، برتقالي) مع تحسين الخلفيات أيضاً
   static final ThemeData blueTheme = ThemeData(
     primaryColor: const Color(0xFF1e40af),
     colorScheme: ColorScheme.fromSwatch().copyWith(
+      primary: const Color(0xFF1e40af),
       secondary: const Color(0xFF3b82f6),
-      surface: const Color(0xFFf0f9ff),
+      surface: const Color(0xFFF0F9FF), // Sky 50
     ),
     fontFamily: 'Cairo',
     useMaterial3: true,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: const Color(0xFFf0f9ff),
+    scaffoldBackgroundColor: const Color(0xFFF0F9FF),
     cardColor: Colors.white,
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF1e40af),
       foregroundColor: Colors.white,
-      elevation: 4,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.white,
+      elevation: 0,
     ),
   );
 
-  // الثيم الأخضر
   static final ThemeData greenTheme = ThemeData(
     primaryColor: const Color(0xFF15803d),
     colorScheme: ColorScheme.fromSwatch().copyWith(
+      primary: const Color(0xFF15803d),
       secondary: const Color(0xFF22c55e),
-      surface: const Color(0xFFf0fdf4),
+      surface: const Color(0xFFF0FDF4), // Green 50
     ),
     fontFamily: 'Cairo',
     useMaterial3: true,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: const Color(0xFFf0fdf4),
+    scaffoldBackgroundColor: const Color(0xFFF0FDF4),
     cardColor: Colors.white,
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF15803d),
       foregroundColor: Colors.white,
-      elevation: 4,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.white,
+      elevation: 0,
     ),
   );
 
-  // الثيم البرتقالي
   static final ThemeData orangeTheme = ThemeData(
     primaryColor: const Color(0xFFea580c),
     colorScheme: ColorScheme.fromSwatch().copyWith(
+      primary: const Color(0xFFea580c),
       secondary: const Color(0xFFfb923c),
-      surface: const Color(0xFFfff7ed),
+      surface: const Color(0xFFFFF7ED), // Orange 50
     ),
     fontFamily: 'Cairo',
     useMaterial3: true,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: const Color(0xFFfff7ed),
+    scaffoldBackgroundColor: const Color(0xFFFFF7ED),
     cardColor: Colors.white,
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFFea580c),
       foregroundColor: Colors.white,
-      elevation: 4,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.white,
+      elevation: 0,
     ),
   );
 
-  // الألوان المحددة من الثيمات
+  // --- Getters للألوان لتسهيل الاستخدام ---
+
   Color get primaryColor {
     switch (_currentTheme) {
       case AppTheme.dark:
@@ -191,7 +198,6 @@ class ThemeProvider with ChangeNotifier {
         return const Color(0xFF15803d);
       case AppTheme.orange:
         return const Color(0xFFea580c);
-      case AppTheme.light:
       default:
         return const Color(0xFF0f766e);
     }
@@ -207,7 +213,6 @@ class ThemeProvider with ChangeNotifier {
         return const Color(0xFF22c55e);
       case AppTheme.orange:
         return const Color(0xFFfb923c);
-      case AppTheme.light:
       default:
         return const Color(0xFF14b8a6);
     }
@@ -216,56 +221,63 @@ class ThemeProvider with ChangeNotifier {
   Color get accentColor => secondaryColor;
 
   Color get cardColor {
-    switch (_currentTheme) {
-      case AppTheme.dark:
-        return const Color(0xFF1a1a1a);
-      default:
-        return Colors.white;
-    }
+    return _currentTheme == AppTheme.dark
+        ? const Color(0xFF1e293b)
+        : Colors.white;
   }
 
+  // ✅ لون النص الجديد (Slate 800) بدلاً من الأسود
   Color get textColor {
-    switch (_currentTheme) {
-      case AppTheme.dark:
-        return Colors.white;
-      default:
-        return Colors.black87;
-    }
+    return _currentTheme == AppTheme.dark
+        ? const Color(0xFFF8FAFC) // Slate 50
+        : const Color(0xFF1E293B); // Slate 800
   }
 
-  Color get backgroundColor {
-    switch (_currentTheme) {
-      case AppTheme.dark:
-        return const Color(0xFF121212);
-      case AppTheme.blue:
-        return const Color(0xFFf0f9ff);
-      case AppTheme.green:
-        return const Color(0xFFf0fdf4);
-      case AppTheme.orange:
-        return const Color(0xFFfff7ed);
-      case AppTheme.light:
-      default:
-        return const Color(0xFFf8fafc);
-    }
+  // ✅ لون النص الفرعي الجديد (رمادي متوسط)
+  Color get subTextColor {
+    return _currentTheme == AppTheme.dark
+        ? const Color(0xFF94A3B8) // Slate 400
+        : const Color(0xFF64748B); // Slate 500
+  }
+
+  // ✅ لون الظل الجديد (ملون وليس أسود)
+  Color get shadowColor {
+    return _currentTheme == AppTheme.dark
+        ? const Color(0xFF0F172A).withOpacity(0.5)
+        : primaryColor.withOpacity(0.15);
   }
 
   Color get surfaceColor {
     switch (_currentTheme) {
       case AppTheme.dark:
-        return const Color(0xFF1a1a1a);
+        return const Color(0xFF1e293b);
       case AppTheme.blue:
-        return const Color(0xFFf0f9ff);
+        return const Color(0xFFF0F9FF);
       case AppTheme.green:
-        return const Color(0xFFf0fdf4);
+        return const Color(0xFFF0FDF4);
       case AppTheme.orange:
-        return const Color(0xFFfff7ed);
-      case AppTheme.light:
+        return const Color(0xFFFFF7ED);
       default:
-        return const Color(0xFFf8fafc);
+        return const Color(0xFFF1F5F9);
     }
   }
 
-  // ألوان إضافية
+  Color get scaffoldBackgroundColor {
+    switch (_currentTheme) {
+      case AppTheme.dark:
+        return const Color(0xFF0F172A);
+      case AppTheme.blue:
+        return const Color(0xFFF0F9FF);
+      case AppTheme.green:
+        return const Color(0xFFF0FDF4);
+      case AppTheme.orange:
+        return const Color(0xFFFFF7ED);
+      default:
+        return const Color(0xFFF1F5F9);
+    }
+  }
+
+  // ألوان إضافية مساعدة
   Color get primaryColorLight => _colorWithOpacity(primaryColor, 0.1);
   Color get primaryColorMedium => _colorWithOpacity(primaryColor, 0.3);
   Color get secondaryColorLight => _colorWithOpacity(secondaryColor, 0.1);
@@ -277,7 +289,6 @@ class ThemeProvider with ChangeNotifier {
   Color get warningColor => const Color(0xFFf59e0b);
   Color get infoColor => const Color(0xFF0ea5e9);
 
-  // دالة مساعدة للـ opacity
   Color _colorWithOpacity(Color color, double opacity) {
     final clampedOpacity = opacity.clamp(0.0, 1.0);
     return color.withOpacity(clampedOpacity);

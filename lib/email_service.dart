@@ -4,8 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 
-// ❌ إزالة env_config واستبداله بـ app_config
-import 'app_config.dart'; // ✅ الملف الجديد
+import 'app_config.dart';
 
 class EmailService {
   static Future<void> sendEmail({
@@ -21,13 +20,13 @@ class EmailService {
     String? country,
   }) async {
     try {
-      // ✅ استخدام AppConfig مباشرة
       final String username = AppConfig.emailUsername;
       final String password = AppConfig.emailPassword;
 
-      // تحقق بسيط
       if (username.isEmpty || password.isEmpty) {
-        print('⚠️ تحذير: إعدادات البريد غير مكتملة، استخدام القيم الافتراضية');
+        if (kDebugMode) {
+          print('⚠️ تحذير: إعدادات البريد غير مكتملة في AppConfig');
+        }
       }
 
       final smtpServer = gmail(username, password);
@@ -38,8 +37,8 @@ class EmailService {
 
       // إنشاء الرسالة
       final message = Message()
-        ..from = Address(username, AppConfig.emailSenderName) // ✅ من AppConfig
-        ..recipients.add(username)
+        ..from = Address(username, AppConfig.emailSenderName)
+        ..recipients.add(username) // إرسال لنفس البريد (للمكتب)
         ..subject = '📋 طلب جديد - $name'
         ..html = _createHtmlMessage(
           name: name,
@@ -52,7 +51,7 @@ class EmailService {
           hasPdfFile: pdfFile != null,
         );
 
-      // إضافة المرفقات مع أسماء منظمة
+      // إضافة المرفقات
       _addAttachment(message, passport, '${name}_جواز_السفر.jpg');
       _addAttachment(message, personalPhoto, '${name}_صورة_شخصية.jpg');
       _addAttachment(message, certificateFront, '${name}_شهادة_أمام.jpg');
@@ -62,15 +61,14 @@ class EmailService {
       }
 
       if (pdfFile != null) {
-        _addAttachment(message, pdfFile, '${name}_مستندات.pdf');
+        _addAttachment(message, pdfFile, '${name}_مستندات_إضافية.pdf');
       }
 
       // إرسال الرسالة
       final sendReport = await send(message, smtpServer);
 
       if (kDebugMode) {
-        print('✅ تم إرسال البريد بنجاح إلى $username');
-        print('📋 تقرير الإرسال: ${sendReport.toString()}');
+        print('✅ تم إرسال البريد بنجاح: ${sendReport.toString()}');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -80,7 +78,6 @@ class EmailService {
     }
   }
 
-  // بقية الدوال كما هي بدون تغيير...
   static void _addAttachment(Message message, File file, String fileName) {
     message.attachments.add(
       FileAttachment(file)
@@ -93,7 +90,6 @@ class EmailService {
     return fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
   }
 
-  // دالة createHtmlMessage تبقى كما هي بدون تغيير...
   static String _createHtmlMessage({
     required String name,
     required String? phone,
@@ -104,8 +100,6 @@ class EmailService {
     required bool hasCertificateBack,
     required bool hasPdfFile,
   }) {
-    // ... المحتوى الكامل للدالة يبقى كما هو
-    // (لقد حذفته للاختصار، لكنه يبقى كما في كودك الأصلي)
     final countryNames = {
       'SD': '🇸🇩 السودان',
       'SY': '🇸🇾 سوريا',
@@ -116,7 +110,7 @@ class EmailService {
 
     final countryName = countryNames[country] ?? country ?? 'غير محدد';
 
-    final phoneHtml = phone != null
+    final phoneHtml = phone != null && phone.isNotEmpty
         ? '''
     <div class="info-item">
         <div class="info-label">📱 رقم الهاتف</div>
@@ -125,7 +119,7 @@ class EmailService {
     '''
         : '';
 
-    final emailHtml = email != null
+    final emailHtml = email != null && email.isNotEmpty
         ? '''
     <div class="info-item">
         <div class="info-label">📧 البريد الإلكتروني</div>
@@ -183,7 +177,6 @@ class EmailService {
         .footer { background: #f1f5f9; padding: 30px; text-align: center; border-top: 2px solid #e2e8f0; color: #64748b; font-size: 14px; }
         .footer a { color: #0f766e; text-decoration: none; font-weight: 600; }
         .badge { display: inline-block; padding: 5px 15px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 10px; }
-        .badge-optional { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
         @media (max-width: 600px) {
             .content { padding: 20px; }
             .header { padding: 30px 20px; }
@@ -194,7 +187,7 @@ class EmailService {
 <body>
     <div class="container">
         <div class="header">
-            <h1>📋 طلب جديد للدراسة في رواندا</h1>
+            <h1>📋 طلب جديد للدراسة</h1>
             <div class="subtitle">${AppConfig.emailSenderName}</div>
             <div class="timestamp">🕒 $dateTime</div>
         </div>
@@ -204,7 +197,7 @@ class EmailService {
                 <h2 class="section-title"><span>👤 معلومات الطالب</span></h2>
                 <div class="info-grid">
                     <div class="info-item">
-                        <div class="info-label">📝 الاسم الكامل</div>
+                        <div class="info-label">📝 الاسم الكامل والملاحظات</div>
                         <div class="info-value">$name</div>
                     </div>
                     <div class="info-item">
@@ -250,10 +243,7 @@ class EmailService {
         <div class="footer">
             <p>تم إرسال هذا الطلب تلقائياً من تطبيق <strong>${AppConfig.appName}</strong></p>
             <p>🕒 وقت الإرسال: $dateTime</p>
-            <p>📧 للإستفسار: <a href="mailto:${AppConfig.emailUsername}">${AppConfig.emailUsername}</a></p>
-            <p style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
-                ⚠️ هذه رسالة آلية، يرجى عدم الرد عليها مباشرةً
-            </p>
+            <p>⚠️ هذه رسالة آلية.</p>
         </div>
     </div>
 </body>
@@ -262,21 +252,21 @@ class EmailService {
   }
 }
 
-// الدالة القديمة للحفاظ على التوابق
-Future<void> sendEmail(
-  String name,
+// ✅ تم تصحيح الدالة هنا لتستخدم الأقواس {} لكل المتغيرات
+Future<void> sendEmail({
+  required String name,
   File? pdfFile,
-  File passport,
-  File personalPhoto,
-  File certificateFront,
-  File? certificateBack, {
+  required File passport,
+  required File personalPhoto,
+  required File certificateFront,
+  File? certificateBack,
   String? phone,
-  String? whatsapp,
+  required String whatsapp,
   String? email,
   String? country,
 }) async {
-  if (whatsapp == null || whatsapp.isEmpty) {
-    throw Exception('WhatsApp number is required');
+  if (whatsapp.isEmpty) {
+    throw Exception('رقم الواتساب مطلوب');
   }
 
   await EmailService.sendEmail(

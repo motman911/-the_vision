@@ -1,211 +1,299 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'theme_provider.dart';
 import 'l10n/language_provider.dart';
+import 'app_config.dart';
 
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ThemeProvider, LanguageProvider>(
-      builder: (context, themeProvider, languageProvider, child) {
-        return Scaffold(
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 24),
+    final theme = Provider.of<ThemeProvider>(context);
+    final lang = Provider.of<LanguageProvider>(context);
 
-                // الرؤية والرسالة
-                Text(
-                  languageProvider.isArabic
-                      ? 'رؤيتنا ورسالتنا'
-                      : 'Our Vision and Mission',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: themeProvider.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildValueCard(
-                  languageProvider.isArabic ? 'رؤيتنا' : 'Our Vision',
-                  languageProvider.isArabic
-                      ? 'أن نكون الوكالة الرائدة في تمكين الطلاب العرب من تحقيق أحلامهم الأكاديمية في رواندا'
-                      : 'To be the leading agency in enabling Arab students to achieve their academic dreams in Rwanda',
-                  Icons.visibility,
-                  themeProvider,
-                ),
-                _buildValueCard(
-                  languageProvider.isArabic ? 'رسالتنا' : 'Our Mission',
-                  languageProvider.isArabic
-                      ? 'توفير تجربة دراسية سلسة وناجحة للطلاب من خلال تقديم الدعم الكامل في جميع مراحل رحلتهم الأكاديمية'
-                      : 'Providing a smooth and successful study experience for students by offering full support at all stages of their academic journey',
-                  Icons.flag,
-                  themeProvider,
-                ),
-                _buildValueCard(
-                  languageProvider.isArabic ? 'هدفنا' : 'Our Goal',
-                  languageProvider.isArabic
-                      ? 'تقديم خدمات متميزة تركز على احتياجات الطلاب، مع الحفاظ على الشفافية والمصداقية'
-                      : 'Providing distinguished services focused on student needs, while maintaining transparency and credibility',
-                  Icons.star,
-                  themeProvider,
-                ),
-                const SizedBox(height: 24),
-
-                // القيم الأساسية
-                Text(
-                  languageProvider.isArabic
-                      ? 'قيمنا الأساسية'
-                      : 'Our Core Values',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: themeProvider.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildValueItem(
-                  languageProvider.isArabic ? 'الثقة' : 'Trust',
-                  languageProvider.isArabic
-                      ? 'نحن نحرص على بناء علاقات ثقة طويلة الأمد مع طلابنا، حيث نضع مصلحتهم في المقام الأول'
-                      : 'We are keen on building long-term trust relationships with our students, where we prioritize their interests',
-                  Icons.handshake,
-                  themeProvider,
-                ),
-                _buildValueItem(
-                  languageProvider.isArabic ? 'الشفافية' : 'Transparency',
-                  languageProvider.isArabic
-                      ? 'جميع خطواتنا واضحة وشفافة دون أي تكاليف خفية، مع تقديم تقارير دورية عن سير الإجراءات'
-                      : 'All our steps are clear and transparent without any hidden costs, with periodic reports on the progress of procedures',
-                  Icons.visibility,
-                  themeProvider,
-                ),
-                _buildValueItem(
-                  languageProvider.isArabic ? 'الالتزام' : 'Commitment',
-                  languageProvider.isArabic
-                      ? 'نلتزم بمواعيدنا ونحترم تعهداتنا تجاه الطلاب، مع تقديم حلول سريعة لأي تحديات تواجههم'
-                      : 'We adhere to our schedules and respect our commitments to students, providing quick solutions to any challenges they face',
-                  Icons.event_available,
-                  themeProvider,
-                ),
-                _buildValueItem(
-                  languageProvider.isArabic ? 'الدعم' : 'Support',
-                  languageProvider.isArabic
-                      ? 'دعم مستمر للطالب طوال فترة دراسته في رواندا، مع فريق متكامل لمساعدته في جميع احتياجاته'
-                      : 'Continuous support for the student throughout their study period in Rwanda, with an integrated team to assist them in all their needs',
-                  Icons.support,
-                  themeProvider,
-                ),
-                const SizedBox(height: 24),
-
-                // فريق العمل
-                Text(
-                  languageProvider.isArabic ? 'فريق العمل' : 'Our Team',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: themeProvider.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildTeamMember(
-                  languageProvider.isArabic ? 'أسامة جمال' : 'Osama Jamal',
-                  languageProvider.isArabic
-                      ? 'مستشار أكاديمي ومسؤول متابعة الطلاب'
-                      : 'Academic Advisor and Student Follow-up Officer',
-                  languageProvider.isArabic
-                      ? 'خبرة في مجال الاستشارات الأكاديمية والتوجيه للدراسة في رواندا، بالإضافة إلى متابعة الطلاب ودعمهم خلال رحلتهم الدراسية.'
-                      : 'Experience in the field of academic consultations and guidance for studying in Rwanda, in addition to following up with students and supporting them during their study journey.',
-                  themeProvider,
-                ),
-                _buildTeamMember(
-                  languageProvider.isArabic
-                      ? 'مؤتمن نور النبي'
-                      : 'Mu\'taman Noor Al-Nabi',
-                  languageProvider.isArabic
-                      ? 'مسؤول استقبال الطلاب والدعم المستمر'
-                      : 'Student Reception Officer and Continuous Support',
-                  languageProvider.isArabic
-                      ? 'يقوم باستقبال الطلاب في رواندا ومساعدتهم في خطواتهم الأولى، ويقدم الدعم مستمر للطلاب طوال فترة دراستهم.'
-                      : 'Receives students in Rwanda and assists them in their first steps, and provides continuous support to students throughout their studies.',
-                  themeProvider,
-                ),
-                _buildTeamMember(
-                  languageProvider.isArabic ? 'محمد عادل' : 'Mohamed Adel',
-                  languageProvider.isArabic
-                      ? 'مسؤول ارشاد الطلاب والدعم المستمر'
-                      : 'Student Guidance Officer and Continuous Support',
-                  languageProvider.isArabic
-                      ? 'يعمل على تيسير عملية الانتقال والاستقرار للطلاب في رواندا'
-                      : 'Works to facilitate the transition and stability process for students in Rwanda',
-                  themeProvider,
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: Text(lang.aboutUs),
+        centerTitle: true,
+        backgroundColor: theme.primaryColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            lang.isArabic ? Icons.arrow_back_ios : Icons.arrow_back_ios_new,
+            color: Colors.white,
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildValueCard(
-    String title,
-    String description,
-    IconData icon,
-    ThemeProvider themeProvider,
-  ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 4,
-      child: Padding(
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
-        child: Row(
+        child: Column(
           children: [
+            // 1. الشعار مع تصميم حديث
+            const SizedBox(height: 20),
             Container(
-              width: 50,
-              height: 50,
+              padding: const EdgeInsets.all(4), // حدود دقيقة
               decoration: BoxDecoration(
-                color: themeProvider.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                color: theme.cardColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.primaryColor.withOpacity(0.2), // ظل ملون متوهج
+                    blurRadius: 25,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+                border: Border.all(
+                    color: theme.primaryColor.withOpacity(0.1), width: 2),
               ),
-              child: Icon(
-                icon,
-                size: 28,
-                color: themeProvider.primaryColor,
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/icon.png',
+                  width: 110,
+                  height: 110,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 110,
+                      height: 110,
+                      color: theme.primaryColor.withOpacity(0.1),
+                      child: Icon(Icons.school_rounded,
+                          size: 60, color: theme.primaryColor),
+                    );
+                  },
+                ),
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
+
+            const SizedBox(height: 20),
+            Text(
+              AppConfig.appName,
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: theme.textColor,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              lang.isArabic
+                  ? 'بوابتك الأولى للدراسة في رواندا'
+                  : 'Your Gateway to Study in Rwanda',
+              style: TextStyle(color: theme.subTextColor, fontSize: 16),
+            ),
+            const SizedBox(height: 40),
+
+            // 2. الرؤية والرسالة (تصميم أنيق)
+            _buildSectionTitle(
+                lang.isArabic ? 'رؤيتنا ورسالتنا' : 'Our Vision and Mission',
+                Icons.lightbulb_outline,
+                theme),
+
+            _buildInfoCard(
+              title: lang.isArabic ? 'رؤيتنا' : 'Our Vision',
+              content: lang.isArabic
+                  ? 'أن نكون الوكالة الرائدة في تمكين الطلاب العرب من تحقيق أحلامهم الأكاديمية في رواندا.'
+                  : 'To be the leading agency in enabling Arab students to achieve their academic dreams in Rwanda.',
+              icon: Icons.visibility,
+              color: Colors.blueAccent,
+              theme: theme,
+            ),
+            _buildInfoCard(
+              title: lang.isArabic ? 'رسالتنا' : 'Our Mission',
+              content: lang.isArabic
+                  ? 'توفير تجربة دراسية سلسة وناجحة للطلاب من خلال تقديم الدعم الكامل في جميع مراحل رحلتهم الأكاديمية.'
+                  : 'Providing a smooth and successful study experience for students by offering full support at all stages.',
+              icon: Icons.flag,
+              color: Colors.orangeAccent,
+              theme: theme,
+            ),
+            _buildInfoCard(
+              title: lang.isArabic ? 'هدفنا' : 'Our Goal',
+              content: lang.isArabic
+                  ? 'تقديم خدمات متميزة تركز على احتياجات الطلاب، مع الحفاظ على الشفافية والمصداقية.'
+                  : 'Providing distinguished services focused on student needs, while maintaining transparency and credibility.',
+              icon: Icons.track_changes,
+              color: Colors.green,
+              theme: theme,
+            ),
+
+            const SizedBox(height: 30),
+
+            // 3. القيم الأساسية
+            _buildSectionTitle(
+                lang.isArabic ? 'قيمنا الأساسية' : 'Our Core Values',
+                Icons.diamond_outlined,
+                theme),
+
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  )
+                ],
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: themeProvider.primaryColor,
-                    ),
+                  _buildValueItem(
+                    lang.isArabic ? 'الثقة' : 'Trust',
+                    lang.isArabic
+                        ? 'بناء علاقات طويلة الأمد.'
+                        : 'Building long-term relationships.',
+                    Icons.handshake,
+                    theme,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                  Divider(color: Colors.grey.withOpacity(0.1)),
+                  _buildValueItem(
+                    lang.isArabic ? 'الشفافية' : 'Transparency',
+                    lang.isArabic
+                        ? 'وضوح تام دون تكاليف خفية.'
+                        : 'Total clarity, no hidden costs.',
+                    Icons.visibility_off_outlined,
+                    theme,
+                  ),
+                  Divider(color: Colors.grey.withOpacity(0.1)),
+                  _buildValueItem(
+                    lang.isArabic ? 'الدعم' : 'Support',
+                    lang.isArabic
+                        ? 'دعم مستمر طوال الدراسة.'
+                        : 'Continuous support throughout study.',
+                    Icons.support_agent,
+                    theme,
                   ),
                 ],
               ),
             ),
+
+            const SizedBox(height: 30),
+
+            // 4. فريق العمل
+            _buildSectionTitle(
+                lang.isArabic ? 'فريق العمل' : 'Our Team', Icons.groups, theme),
+
+            _buildTeamMember(
+              lang.isArabic ? 'أسامة جمال' : 'Osama Jamal',
+              lang.isArabic ? 'مستشار أكاديمي' : 'Academic Advisor',
+              lang.isArabic
+                  ? 'خبرة واسعة في التوجيه الأكاديمي للطلاب العرب.'
+                  : 'Extensive experience in academic guidance.',
+              theme,
+            ),
+            _buildTeamMember(
+              lang.isArabic ? 'مؤتمن نور النبي' : 'Mu\'taman Noor',
+              lang.isArabic ? 'مسؤول الاستقبال' : 'Reception Officer',
+              lang.isArabic
+                  ? 'متخصص في تسهيل إجراءات الوصول والاستقرار.'
+                  : 'Specialist in arrival and settling-in procedures.',
+              theme,
+            ),
+            _buildTeamMember(
+              lang.isArabic ? 'محمد عادل' : 'Mohamed Adel',
+              lang.isArabic ? 'مسؤول الإرشاد' : 'Guidance Officer',
+              lang.isArabic
+                  ? 'مرافق دائم للطلاب لضمان راحتهم واندماجهم.'
+                  : 'Permanent companion for students ensuring comfort.',
+              theme,
+            ),
+
+            const SizedBox(height: 20),
           ],
         ),
+      ),
+    );
+  }
+
+  // --- Helper Widgets ---
+
+  Widget _buildSectionTitle(String title, IconData icon, ThemeProvider theme) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: theme.primaryColor, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: theme.textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard({
+    required String title,
+    required String content,
+    required IconData icon,
+    required Color color,
+    required ThemeProvider theme,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border(
+          right: BorderSide(color: color, width: 4), // خط ملون جانبي
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 24),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 14,
+              color: theme.textColor.withOpacity(0.8),
+              height: 1.6,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -214,30 +302,39 @@ class AboutUsPage extends StatelessWidget {
     String title,
     String description,
     IconData icon,
-    ThemeProvider themeProvider,
+    ThemeProvider theme,
   ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      child: ListTile(
-        leading: Icon(
-          icon,
-          size: 24,
-          color: themeProvider.primaryColor,
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: theme.primaryColor, size: 24),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: theme.textColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: theme.subTextColor,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        subtitle: Text(
-          description,
-          style: const TextStyle(
-            fontSize: 14,
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -246,66 +343,78 @@ class AboutUsPage extends StatelessWidget {
     String name,
     String position,
     String description,
-    ThemeProvider themeProvider,
+    ThemeProvider theme,
   ) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Center(
+              child: Text(
+                name.substring(0, 1),
+                style: TextStyle(
+                  color: theme.primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: themeProvider.primaryColor,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Icon(
-                    Icons.person,
-                    color: Colors.white,
-                    size: 30,
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textColor,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: themeProvider.primaryColor,
-                        ),
-                      ),
-                      Text(
-                        position,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 2),
+                Text(
+                  position,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: theme.secondaryColor,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.textColor.withOpacity(0.7),
+                    height: 1.4,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              description,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

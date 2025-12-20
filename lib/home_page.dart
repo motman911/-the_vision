@@ -1,7 +1,7 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// ignore: unused_import
-import 'package:url_launcher/url_launcher.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'dart:async';
 
@@ -13,6 +13,8 @@ import 'gallery_page.dart';
 import 'theme_provider.dart';
 import 'l10n/language_provider.dart';
 import 'widgets.dart';
+import 'cost_calculator_page.dart';
+import 'testimonials_section.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -76,9 +78,10 @@ class _HomePageState extends State<HomePage> {
       child: CustomScrollView(
         controller: _scrollController,
         slivers: [
+          // الهيدر الثابت في الأعلى
           SliverToBoxAdapter(
             child: Container(
-              height: 146,
+              height: 120,
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/The_Vision_P1.jpg'),
@@ -91,35 +94,50 @@ class _HomePageState extends State<HomePage> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withOpacity(0.3),
-                      Colors.black.withOpacity(0.1),
+                      Colors.black.withOpacity(0.4),
+                      themeProvider.scaffoldBackgroundColor.withOpacity(0.1),
                     ],
                   ),
                 ),
               ),
             ),
           ),
+
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
               child: Column(
                 crossAxisAlignment: languageProvider.isArabic
                     ? CrossAxisAlignment.start
                     : CrossAxisAlignment.end,
                 children: [
+                  // ✅ 1. السلايدر (تم تحسين الشكل والحجم والظل)
                   Container(
+                    height: 260, // زيادة الارتفاع
                     margin: const EdgeInsets.only(bottom: 20),
-                    child: Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        SizedBox(
-                          height: 225,
-                          child: PageView(
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          BorderRadius.circular(24), // حواف أكثر استدارة
+                      boxShadow: [
+                        BoxShadow(
+                          color: themeProvider.primaryColor
+                              .withOpacity(0.2), // ظل ملون (ليس أسود)
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Stack(
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          PageView(
                             controller: _imageController,
                             onPageChanged: (index) {
-                              setState(() {
-                                _currentImageIndex = index;
-                              });
+                              setState(() => _currentImageIndex = index);
                             },
                             children: [
                               _buildImageCard('assets/images/The_Vision_P2.jpg',
@@ -128,33 +146,67 @@ class _HomePageState extends State<HomePage> {
                                   themeProvider),
                             ],
                           ),
-                        ),
-                        Positioned(
-                          bottom: 10,
-                          child: SmoothPageIndicator(
-                            controller: _imageController,
-                            count: 2,
-                            effect: WormEffect(
-                              dotHeight: 8,
-                              dotWidth: 8,
-                              activeDotColor: themeProvider.accentColor,
-                              dotColor: Colors.white70,
+
+                          // تدرج لوني أسفل السلايدر لوضوح النقاط
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 80,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: [
+                                    Colors.black.withOpacity(0.7),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+
+                          Positioned(
+                            bottom: 15,
+                            child: SmoothPageIndicator(
+                              controller: _imageController,
+                              count: 2,
+                              effect: const ExpandingDotsEffect(
+                                // تأثير أفخم للنقاط
+                                dotHeight: 8,
+                                dotWidth: 8,
+                                activeDotColor: Colors.white,
+                                dotColor: Colors.white38,
+                                expansionFactor: 4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+
+                  // 2. حاسبة التكاليف
+                  _buildCostCalculatorCard(context, languageProvider),
+
+                  const SizedBox(height: 16),
+
+                  // 3. كرت الترحيب
                   _buildWelcomeCard(context, themeProvider, languageProvider),
-                  const SizedBox(height: 24),
+
+                  const SizedBox(height: 30),
+
+                  // 4. الخدمات الرئيسية
                   _buildSectionTitle(
                       languageProvider.mainServices, themeProvider),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   SizedBox(
-                    height: 130,
+                    height: 140,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       reverse: !languageProvider.isArabic,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
                       children: [
                         ServicePreviewCard(
                           title: languageProvider.applyServices,
@@ -183,31 +235,42 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 28),
+
+                  const SizedBox(height: 30),
+
+                  // 5. مميزات الدراسة
                   _buildSectionTitle(
                       languageProvider.studyFeatures, themeProvider),
                   const SizedBox(height: 12),
                   ..._buildFeatureItems(themeProvider, languageProvider),
-                  const SizedBox(height: 28),
+
+                  const SizedBox(height: 30),
+
+                  // 6. تكاليف المعيشة
                   _buildSectionTitle(
                       languageProvider.livingCosts, themeProvider),
                   const SizedBox(height: 12),
                   _buildCostsGrid(themeProvider, languageProvider),
-                  const SizedBox(height: 28),
-                  _buildSectionTitle(
-                      languageProvider.testimonials, themeProvider),
-                  const SizedBox(height: 12),
-                  ..._buildTestimonials(themeProvider, languageProvider),
-                  const SizedBox(height: 28),
+
+                  const SizedBox(height: 30),
+
+                  // 7. قصص النجاح
+                  TestimonialsSection(
+                      theme: themeProvider, lang: languageProvider),
+
+                  const SizedBox(height: 30),
+
+                  // 8. روابط سريعة
                   _buildFAQCard(context, themeProvider, languageProvider),
                   _buildUniversitiesCard(
                       context, themeProvider, languageProvider),
                   _buildGalleryCard(context, themeProvider, languageProvider),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: WhatsAppButton(),
-                  ),
-                  const SizedBox(height: 20),
+
+                  const SizedBox(height: 30),
+
+                  // 9. زر الواتساب
+                  const Center(child: WhatsAppButton()),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -217,24 +280,106 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // --- Helper Widgets ---
+
   Widget _buildImageCard(String imagePath, ThemeProvider themeProvider) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Image.asset(
-        imagePath,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        errorBuilder: (context, error, stackTrace) => Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                themeProvider.primaryColor,
-                themeProvider.secondaryColor,
+    return Image.asset(
+      imagePath,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      errorBuilder: (context, error, stackTrace) => Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [themeProvider.primaryColor, themeProvider.secondaryColor],
+          ),
+        ),
+        child: const Center(
+            child:
+                Icon(Icons.image_not_supported, color: Colors.white, size: 50)),
+      ),
+    );
+  }
+
+  Widget _buildCostCalculatorCard(
+      BuildContext context, LanguageProvider languageProvider) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFF59E0B).withOpacity(0.3), // ظل برتقالي متوهج
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const CostCalculatorPage()),
+            );
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFFF59E0B),
+                  Color(0xFFfbbf24)
+                ], // تدرج برتقالي ذهبي
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.25),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.calculate,
+                      color: Colors.white, size: 32),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        languageProvider.isArabic
+                            ? 'حاسبة التكاليف الذكية'
+                            : 'Smart Cost Calculator',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        languageProvider.isArabic
+                            ? 'خطط ميزانيتك الدراسية والمعيشية بدقة'
+                            : 'Plan your tuition & living budget accurately',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios_rounded,
+                    color: Colors.white, size: 20),
               ],
             ),
-            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ),
@@ -244,10 +389,20 @@ class _HomePageState extends State<HomePage> {
   Widget _buildWelcomeCard(BuildContext context, ThemeProvider themeProvider,
       LanguageProvider languageProvider) {
     return Card(
-      elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+      elevation: 0, // إلغاء ظل الكارد الافتراضي
+      color: Colors.transparent, // شفاف لنستخدم الكونتينر
+      margin: EdgeInsets.zero,
       child: Container(
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color:
+                  themeProvider.primaryColor.withOpacity(0.2), // ظل ملون ناعم
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -256,26 +411,26 @@ class _HomePageState extends State<HomePage> {
               themeProvider.secondaryColor,
             ],
           ),
-          borderRadius: BorderRadius.circular(16.0),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
               Text(
                 languageProvider.appTitle,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Text(
                 languageProvider.startJourney,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: Colors.white70),
+                style: const TextStyle(
+                    fontSize: 15, color: Colors.white70, height: 1.5),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -283,21 +438,23 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const ContactPage()),
+                        builder: (context) =>
+                            const ContactPage(initialInterest: '')),
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: themeProvider.accentColor,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.white,
+                  foregroundColor: themeProvider.primaryColor,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0)),
+                      borderRadius: BorderRadius.circular(30)),
                 ),
                 child: Text(
                   languageProvider.contactNow,
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600),
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -309,14 +466,27 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildSectionTitle(String title, ThemeProvider themeProvider) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: themeProvider.primaryColor,
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 24,
+            decoration: BoxDecoration(
+              color: themeProvider.accentColor,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: themeProvider.primaryColor,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -333,23 +503,38 @@ class _HomePageState extends State<HomePage> {
 
     return features.map((feature) {
       return Container(
-        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-        child: Card(
-          elevation: 2,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: ListTile(
-            leading: Icon(Icons.check_circle, color: themeProvider.accentColor),
-            minLeadingWidth: 0,
-            title: Text(
-              feature,
-              style: const TextStyle(fontSize: 14),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: themeProvider.cardColor,
+          borderRadius: BorderRadius.circular(16), // زوايا أنعم
+          boxShadow: [
+            BoxShadow(
+              color: themeProvider.primaryColor
+                  .withOpacity(0.05), // ظل ملون خفيف جداً
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: themeProvider.accentColor.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child:
+                Icon(Icons.check, color: themeProvider.accentColor, size: 20),
           ),
+          title: Text(
+            feature,
+            style: TextStyle(
+                fontSize: 15,
+                color: themeProvider.textColor,
+                fontWeight: FontWeight.w500),
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         ),
       );
     }).toList();
@@ -361,314 +546,186 @@ class _HomePageState extends State<HomePage> {
       {
         'title': languageProvider.singleRoom,
         'cost': '100 - 150',
-        'icon': Icons.home,
+        'icon': Icons.home
       },
       {
         'title': languageProvider.sharedRoom,
         'cost': '50 - 100',
-        'icon': Icons.people,
+        'icon': Icons.people
       },
       {
         'title': languageProvider.monthlyLiving,
         'cost': '100 - 150',
-        'icon': Icons.restaurant,
+        'icon': Icons.restaurant
       },
       {
         'title': languageProvider.transportation,
         'cost': '20 - 40',
-        'icon': Icons.directions_bus,
+        'icon': Icons.directions_bus
       },
     ];
 
-    return GridView.count(
-      crossAxisCount: 2,
+    return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 0.99,
-      crossAxisSpacing: 0.9,
-      mainAxisSpacing: 10,
-      children: costs.map((item) {
-        return Card(
-          elevation: 4,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(item['icon'] as IconData,
-                    size: 28, color: themeProvider.primaryColor),
-                const SizedBox(height: 8),
-                Text(
-                  item['title'] as String,
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w500),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 6),
-                RichText(
-                  text: TextSpan(
-                    text: item['cost'] as String,
-                    style: TextStyle(
-                      fontSize: 16,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1.1,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: costs.length,
+      itemBuilder: (context, index) {
+        final item = costs[index];
+        return Container(
+          decoration: BoxDecoration(
+            color: themeProvider.cardColor,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: themeProvider.primaryColor.withOpacity(0.05),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(item['icon'] as IconData,
+                  size: 32, color: themeProvider.primaryColor),
+              const SizedBox(height: 12),
+              Text(
+                item['title'] as String,
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: themeProvider.textColor),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              RichText(
+                text: TextSpan(
+                  text: item['cost'] as String,
+                  style: TextStyle(
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: themeProvider.accentColor,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: ' ${languageProvider.dollarPerMonth}',
-                        style: const TextStyle(
+                      color: themeProvider.accentColor),
+                  children: [
+                    TextSpan(
+                      text: ' \$',
+                      style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.normal,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
+                          color: themeProvider.textColor.withOpacity(0.6)),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
-      }).toList(),
+      },
     );
   }
 
-  Widget _buildTestimonial(
-      String name, String content, ThemeProvider themeProvider,
-      {int rating = 5}) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              content,
-              style: const TextStyle(fontSize: 14, height: 1.6),
-              textAlign: TextAlign.justify,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: themeProvider.primaryColor,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child:
-                      const Icon(Icons.person, color: Colors.white, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: List.generate(
-                    5,
-                    (index) => Icon(
-                      Icons.star,
-                      size: 18,
-                      color: index < rating ? Colors.amber : Colors.grey[300],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildTestimonials(
-      ThemeProvider themeProvider, LanguageProvider languageProvider) {
-    return [
-      _buildTestimonial(
-        languageProvider.isArabic ? 'محمد اشرف' : 'Mohamed Ashraf',
-        languageProvider.isArabic
-            ? 'مكتب الرؤية غير مجرد مكتب استشارات، هم عائلة داعمة. من لحظة التواصل الأولى حتى وصولي إلى رواندا، شعروا بمسؤوليتي كأخ كبير. ما يميزهم هو المتابعة المستمرة بعد الوصول ومساعدتهم في حل أي مشكلة تواجهني.'
-            : 'The Vision Office is more than just a consultancy, they are a supportive family. From the first contact until my arrival in Rwanda, they made me feel like an older brother. What sets them apart is the continuous follow-up after arrival and their help in solving any problem I face.',
-        themeProvider,
-        rating: 5,
-      ),
-      _buildTestimonial(
-        languageProvider.isArabic ? 'سارة علي' : 'Sara Ali',
-        languageProvider.isArabic
-            ? 'الدعم المستمر بعد الوصول كان ممتازاً، فريق محترف جداً'
-            : 'Continuous support after arrival was excellent, very professional team',
-        themeProvider,
-        rating: 4,
-      ),
-      _buildTestimonial(
-        languageProvider.isArabic ? 'عثمان محمد' : 'Othman Mohamed',
-        languageProvider.isArabic
-            ? 'تجربتي مع مكتب الرؤية كانت ممتازة بكل المقاييس. ساعدوني في اختيار التخصص المناسب، وجمع المستندات، وحتى بعد وصولي لم يتركوني وحيداً. ساعدوني وأسرتي في إيجاد سكن مناسب وقريب من الجامعة. أنصح أي طالب يريد الدراسة في رواندا بالتعامل معهم.'
-            : 'My experience with The Vision Office was excellent in every way. They helped me choose the right major, gather documents, and even after my arrival, they did not leave me alone. They helped me find suitable accommodation close to the university. I recommend anyone who wants to study in Rwanda to deal with them.',
-        themeProvider,
-        rating: 5,
-      ),
-    ];
-  }
-
+  // الويدجتس الأخرى (FAQ, Universities, Gallery)
   Widget _buildFAQCard(BuildContext context, ThemeProvider themeProvider,
       LanguageProvider languageProvider) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => const FAQPage()));
-      },
-      child: Card(
-        elevation: 4,
-        margin: const EdgeInsets.only(top: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                themeProvider.primaryColor,
-                themeProvider.secondaryColor,
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                if (languageProvider.isArabic)
-                  Icon(Icons.arrow_right, color: Colors.white, size: 30),
-                Expanded(
-                  child: Text(
-                    languageProvider.faq,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-                if (!languageProvider.isArabic)
-                  Icon(Icons.help_outline, color: Colors.white, size: 28),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return _buildNavigationCard(
+      context,
+      title: languageProvider.faq,
+      icon: Icons.help_outline,
+      colors: [themeProvider.primaryColor, themeProvider.secondaryColor],
+      onTap: () => Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const FAQPage())),
+      isArabic: languageProvider.isArabic,
     );
   }
 
   Widget _buildGalleryCard(BuildContext context, ThemeProvider themeProvider,
       LanguageProvider languageProvider) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const GalleryPage()));
-      },
-      child: Card(
-        elevation: 4,
-        margin: const EdgeInsets.only(top: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                themeProvider.accentColor,
-                Color.lerp(themeProvider.accentColor, Colors.orange, 0.5)!,
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                if (languageProvider.isArabic)
-                  Icon(Icons.arrow_right, color: Colors.white, size: 30),
-                Expanded(
-                  child: Text(
-                    languageProvider.galleryRwanda,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-                if (!languageProvider.isArabic)
-                  Icon(Icons.photo_library, color: Colors.white, size: 28),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return _buildNavigationCard(
+      context,
+      title: languageProvider.galleryRwanda,
+      icon: Icons.photo_library,
+      colors: [
+        themeProvider.accentColor,
+        Color.lerp(themeProvider.accentColor, Colors.orange, 0.5)!
+      ],
+      onTap: () => Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const GalleryPage())),
+      isArabic: languageProvider.isArabic,
     );
   }
 
   Widget _buildUniversitiesCard(BuildContext context,
       ThemeProvider themeProvider, LanguageProvider languageProvider) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const UniversitiesPage()));
-      },
-      child: Card(
-        elevation: 4,
-        margin: const EdgeInsets.only(top: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return _buildNavigationCard(
+      context,
+      title: languageProvider.famousUniversities,
+      icon: Icons.school,
+      colors: const [Color(0xFF0ea5e9), Color(0xFF38bdf8)],
+      onTap: () => Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UniversitiesPage())),
+      isArabic: languageProvider.isArabic,
+    );
+  }
+
+  Widget _buildNavigationCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required List<Color> colors,
+    required VoidCallback onTap,
+    required bool isArabic,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
         child: Container(
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF0ea5e9), Color(0xFF38bdf8)],
-            ),
-            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+                colors: colors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: colors[0].withOpacity(0.3), // ظل ملون بنفس لون البطاقة
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                if (languageProvider.isArabic)
-                  Icon(Icons.arrow_right, color: Colors.white, size: 30),
-                Expanded(
-                  child: Text(
-                    languageProvider.famousUniversities,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle),
+                    child: Icon(icon, color: Colors.white, size: 24),
                   ),
-                ),
-                if (!languageProvider.isArabic)
-                  Icon(Icons.school, color: Colors.white, size: 28),
-              ],
-            ),
+                  const SizedBox(width: 16),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const Icon(Icons.arrow_forward_ios,
+                  color: Colors.white, size: 18),
+            ],
           ),
         ),
       ),

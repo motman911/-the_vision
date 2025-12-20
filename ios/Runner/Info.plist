@@ -45,5 +45,22 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-</dict>
+
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>نحتاج الوصول إلى معرض الصور لتمكينك من رفع صور المستندات المطلوبة للتسجيل.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>نحتاج الوصول للكاميرا لتصوير المستندات وجواز السفر.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>نحتاج الوصول للميكروفون في حال رفع فيديو (اختياري).</string>
+
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>https</string>
+        <string>http</string>
+        <string>tel</string>
+        <string>mailto</string>
+        <string>whatsapp</string>
+    </array>
+    
+    </dict>
 </plist>

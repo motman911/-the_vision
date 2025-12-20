@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LanguageProvider with ChangeNotifier {
+  // ✅ 1. قيمة افتراضية فورية (تمنع الخطأ عند بدء التشغيل)
   Locale _currentLocale = const Locale('ar', 'AE');
   static const String _languageKey = 'app_language';
 
@@ -9,37 +10,58 @@ class LanguageProvider with ChangeNotifier {
     _loadLanguage();
   }
 
+  // ✅ 2. إصلاح الـ Getter (كان يرجع null سابقاً ويسبب المشكلة)
+  Locale get locale => _currentLocale;
+  // للحفاظ على التوافق مع الأكواد القديمة التي قد تستخدم currentLocale
   Locale get currentLocale => _currentLocale;
 
   bool get isArabic => _currentLocale.languageCode == 'ar';
   bool get isEnglish => _currentLocale.languageCode == 'en';
 
+  // تحميل اللغة المحفوظة
   Future<void> _loadLanguage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final languageCode = prefs.getString(_languageKey) ?? 'ar';
-      final countryCode = languageCode == 'ar' ? 'AE' : 'US';
-      _currentLocale = Locale(languageCode, countryCode);
+      final languageCode = prefs.getString(_languageKey);
+
+      // إذا وجدت لغة محفوظة، قم بتحديثها
+      if (languageCode != null) {
+        final countryCode = languageCode == 'ar' ? 'AE' : 'US';
+        _currentLocale = Locale(languageCode, countryCode);
+        notifyListeners();
+      }
     } catch (e) {
-      _currentLocale = const Locale('ar', 'AE');
+      debugPrint('Error loading language: $e');
     }
-    notifyListeners();
   }
 
-  Future<void> setLanguage(String languageCode) async {
-    final countryCode = languageCode == 'ar' ? 'AE' : 'US';
-    _currentLocale = Locale(languageCode, countryCode);
+  // ✅ 3. دالة تغيير اللغة (محدثة لتقبل Locale)
+  Future<void> changeLanguage(Locale locale) async {
+    if (_currentLocale == locale) return;
+
+    _currentLocale = locale;
+    notifyListeners(); // تحديث الواجهة فوراً
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_languageKey, languageCode);
-
-    notifyListeners();
+    await prefs.setString(_languageKey, locale.languageCode);
   }
 
+  // دالة مساعدة لضبط اللغة عبر النص (String)
+  Future<void> setLanguage(String languageCode) async {
+    final countryCode = languageCode == 'ar' ? 'AE' : 'US';
+    await changeLanguage(Locale(languageCode, countryCode));
+  }
+
+  // ==========================================
+  // 🗣️ نصوص الترجمة (Dictionary)
+  // ==========================================
+
   String get currentLanguageName => isArabic ? 'العربية' : 'English';
+
   String get appTitle => isArabic
       ? 'مكتب الرؤية - الدراسة في رواندا'
       : 'Vision Office - Study in Rwanda';
+
   String get home => isArabic ? 'الرئيسية' : 'Home';
   String get services => isArabic ? 'الخدمات' : 'Services';
   String get universities => isArabic ? 'الجامعات' : 'Universities';
@@ -49,14 +71,17 @@ class LanguageProvider with ChangeNotifier {
   String get gallery => isArabic ? 'المعرض' : 'Gallery';
   String get viewMore => isArabic ? 'عرض المزيد' : 'View More';
   String get settings => isArabic ? 'الإعدادات' : 'Settings';
+
   String get languageText => isArabic ? 'اللغة' : 'Language';
   String get themeText => isArabic ? 'السمة' : 'Theme';
   String get chooseTheme => isArabic ? 'اختر السمة' : 'Choose Theme';
+
   String get lightTheme => isArabic ? 'فاتح' : 'Light';
   String get darkTheme => isArabic ? 'غامق' : 'Dark';
   String get blueTheme => isArabic ? 'أزرق' : 'Blue';
   String get greenTheme => isArabic ? 'أخضر' : 'Green';
   String get orangeTheme => isArabic ? 'برتقالي' : 'Orange';
+
   String get mainServices => isArabic ? 'الخدمات الرئيسية' : 'Main Services';
   String get applyServices =>
       isArabic ? 'خدمات التقديم' : 'Application Services';
@@ -64,6 +89,7 @@ class LanguageProvider with ChangeNotifier {
   String get studentSupport => isArabic ? 'دعم الطلاب' : 'Student Support';
   String get academicConsultation =>
       isArabic ? 'استشارات أكاديمية' : 'Academic Consultation';
+
   String get studyFeatures =>
       isArabic ? 'مميزات الدراسة في رواندا' : 'Study Features in Rwanda';
   String get feature1 => isArabic ? 'تكاليف معيشة منخفضة' : 'Low living costs';
@@ -76,6 +102,7 @@ class LanguageProvider with ChangeNotifier {
   String get feature5 => isArabic
       ? 'طبيعة خلابة ومناخ معتدل'
       : 'Stunning nature and moderate climate';
+
   String get livingCosts =>
       isArabic ? 'تكاليف المعيشة الشهرية' : 'Monthly Living Costs';
   String get singleRoom => isArabic ? 'غرفة فردية' : 'Single Room';
@@ -83,6 +110,7 @@ class LanguageProvider with ChangeNotifier {
   String get monthlyLiving => isArabic ? 'مصاريف المعيشة' : 'Monthly Expenses';
   String get transportation => isArabic ? 'المواصلات' : 'Transportation';
   String get dollarPerMonth => isArabic ? 'دولار/شهر' : 'USD/Month';
+
   String get testimonials => isArabic ? 'آراء الطلاب' : 'Student Testimonials';
   String get studentPosition1 => isArabic
       ? 'طالب هندسة - جامعة رواندا'
@@ -96,12 +124,11 @@ class LanguageProvider with ChangeNotifier {
   String get testimonial2 => isArabic
       ? 'تجربتي في رواندا كانت استثنائية، البيئة آمنة والتعليم ذات جودة عالية.'
       : 'My experience in Rwanda was exceptional, the environment is safe and education is of high quality.';
+
   String get galleryRwanda => isArabic ? 'معرض رواندا' : 'Rwanda Gallery';
   String get famousUniversities =>
       isArabic ? 'أشهر الجامعات' : 'Famous Universities';
   String get startJourney =>
       isArabic ? 'تواصل معنا عبر واتساب' : 'Contact Us in WhatsApp';
   String get contactNow => isArabic ? 'تواصل معنا الآن' : 'Contact Us Now';
-
-  get translatedTexts => null;
 }

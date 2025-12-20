@@ -1,13 +1,15 @@
-﻿// lib/app_config.dart - الإعدادات الثابتة المضمونة
+﻿import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+// lib/app_config.dart - الإعدادات الثابتة المضمونة
 class AppConfig {
   // إعدادات التطبيق الأساسية
   static const String appName = 'مكتب الرؤية';
   static const String appVersion = '1.2.0';
   static const String appBuildNumber = '3';
 
-  // إعدادات البريد الإلكتروني
-  static const String emailUsername = 'skstechnologies.eld@gmail.com';
-  static const String emailPassword = 'okbezijhpyyylgth';
+  // إعدادات البريد الإلكتروني (الآن آمنة 🔒)
+  static String get emailUsername => dotenv.env['EMAIL_USERNAME'] ?? '';
+  static String get emailPassword => dotenv.env['EMAIL_PASSWORD'] ?? '';
   static const String emailSenderName = 'مكتب الرؤية - The Vision Office';
 
   // إعدادات WhatsApp
@@ -25,7 +27,7 @@ class AppConfig {
 🎯 إعدادات تطبيق مكتب الرؤية:
    📱 اسم التطبيق: $appName
    🔢 الإصدار: $appVersion (بناء: $appBuildNumber)
-   📧 البريد: ${isEmailConfigured ? "✅ مضبوط" : "❌ غير مضبوط"}
+   📧 البريد: ${isEmailConfigured ? "✅ مضبوط (آمن)" : "❌ غير مضبوط"}
    💬 واتساب: $whatsappNumber
     ''');
   }
@@ -35,7 +37,7 @@ class AppConfig {
     return {
       'appName': appName,
       'appVersion': appVersion,
-      'emailUsername': emailUsername,
+      'emailUsername': emailUsername.isNotEmpty ? '***' : '',
       'whatsappNumber': whatsappNumber,
       'isEmailConfigured': isEmailConfigured,
     };

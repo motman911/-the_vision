@@ -1,11 +1,37 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sks.vision"> <!-- 🔧 أضف package هنا -->
-    
+    package="com.sks.vision">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <queries>
+        <package android:name="com.whatsapp" />
+        <package android:name="com.whatsapp.w4b" /> <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+        
+        <intent>
+            <action android:name="android.intent.action.DIAL" />
+            <data android:scheme="tel" />
+        </intent>
+        
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="*/*" />
+        </intent>
+    </queries>
+
     <application
-        android:label="the_vision"
+        android:label="مكتب الرؤية"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"> <!-- 🔧 أضف هذا السطر -->
+        android:icon="@mipmap/launcher_icon"
+        android:usesCleartextTraffic="true">
         
         <activity
             android:name=".MainActivity"
@@ -31,16 +57,4 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
-    
-    <!-- أضف هذه الأذونات إذا كنت تحتاجها -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
-        </intent>
-    </queries>
 </manifest>
