@@ -14,17 +14,22 @@ enum AppTheme {
 class ThemeProvider with ChangeNotifier {
   AppTheme _currentTheme = AppTheme.light;
   static const String _themeKey = 'app_theme';
+  late final SharedPreferences _prefs;
 
   AppTheme get currentTheme => _currentTheme;
 
   ThemeProvider() {
+    _initTheme();
+  }
+
+  Future<void> _initTheme() async {
+    _prefs = await SharedPreferences.getInstance();
     _loadTheme();
   }
 
   Future<void> _loadTheme() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final themeIndex = prefs.getInt(_themeKey) ?? 0;
+      final themeIndex = _prefs.getInt(_themeKey) ?? 0;
       _currentTheme = AppTheme.values[themeIndex];
     } catch (e) {
       _currentTheme = AppTheme.light;
@@ -35,8 +40,7 @@ class ThemeProvider with ChangeNotifier {
   Future<void> setTheme(AppTheme theme) async {
     _currentTheme = theme;
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_themeKey, theme.index);
+      await _prefs.setInt(_themeKey, theme.index);
     } catch (e) {
       // ignore: avoid_print
       print('Error saving theme: $e');

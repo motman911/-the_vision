@@ -16,39 +16,29 @@ class UniversitiesPage extends StatelessWidget {
     return Consumer2<ThemeProvider, LanguageProvider>(
       builder: (context, themeProvider, languageProvider, child) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              languageProvider.universities,
-              style: const TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            backgroundColor: themeProvider.primaryColor,
-            foregroundColor: Colors.white,
-            centerTitle: true,
-            elevation: 4,
-          ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                Container(
-                  width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: themeProvider.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    languageProvider.famousUniversities,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: themeProvider.primaryColor,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
+                //     Container(
+                //       width: double.infinity,
+                //       padding:
+                //           const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                //       decoration: BoxDecoration(
+                //         color: themeProvider.primaryColor.withOpacity(0.1),
+                //         borderRadius: BorderRadius.circular(12),
+                //       ),
+                //       child: Text(
+                //         languageProvider.famousUniversities,
+                //         textAlign: TextAlign.center,
+                //         style: TextStyle(
+                //           fontSize: 22,
+                //           fontWeight: FontWeight.bold,
+                //           color: themeProvider.primaryColor,
+                //         ),
+                //       ),
+                //     ),
+                //     const SizedBox(height: 24),
                 UniversityCard(
                   name: 'Kigali Independent University (ULK)',
                   description: languageProvider.isArabic
@@ -416,6 +406,7 @@ class _UniversityCardState extends State<UniversityCard> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
                       color: Colors.black.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(12),
                     ),

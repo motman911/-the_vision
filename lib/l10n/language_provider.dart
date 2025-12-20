@@ -99,8 +99,9 @@ class LanguageProvider with ChangeNotifier {
   String get galleryRwanda => isArabic ? 'معرض رواندا' : 'Rwanda Gallery';
   String get famousUniversities =>
       isArabic ? 'أشهر الجامعات' : 'Famous Universities';
-  String get startJourney => isArabic
-      ? 'ابدأ رحلتك التعليمية في رواندا مع مكتب الرؤية'
-      : 'Start your educational journey in Rwanda with Vision Office';
+  String get startJourney =>
+      isArabic ? 'تواصل معنا عبر واتساب' : 'Contact Us in WhatsApp';
   String get contactNow => isArabic ? 'تواصل معنا الآن' : 'Contact Us Now';
+
+  get translatedTexts => null;
 }

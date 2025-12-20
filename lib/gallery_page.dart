@@ -92,36 +92,8 @@ class _GalleryPageState extends State<GalleryPage> {
         }
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              languageProvider.gallery,
-              style: const TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            backgroundColor: themeProvider.primaryColor,
-            foregroundColor: Colors.white,
-            centerTitle: true,
-            elevation: 4,
-          ),
           body: Column(
             children: [
-              Container(
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: themeProvider.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  languageProvider.galleryRwanda,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: themeProvider.primaryColor,
-                  ),
-                ),
-              ),
               const SizedBox(height: 16),
               Expanded(
                 child: GridView.builder(
@@ -175,6 +147,7 @@ class _GalleryPageState extends State<GalleryPage> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
+                                    // ignore: deprecated_member_use
                                     color: Colors.black.withOpacity(0.6),
                                     borderRadius: BorderRadius.circular(8),
                                   ),

@@ -21,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  final PageController _pageController = PageController();
 
   final List<Widget> _screens = [
     const HomePage(),
@@ -84,6 +85,23 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _pageController.addListener(() {
+      final newIndex = _pageController.page?.round() ?? 0;
+      if (newIndex != _currentIndex && mounted) {
+        setState(() => _currentIndex = newIndex);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   void _showMoreMenu(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final languageProvider =
@@ -143,9 +161,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: Text(item.label!),
                       onTap: () {
                         Navigator.pop(context);
-                        setState(() {
-                          _currentIndex = index;
-                        });
+                        _pageController.animateToPage(
+                          index,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
                       },
                     );
                   }),
@@ -175,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(
           _pageTitles(languageProvider)[_currentIndex],
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -192,7 +212,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: _screens[_currentIndex],
+      body: PageView(
+        controller: _pageController,
+        children: _screens,
+        onPageChanged: (index) {
+          if (mounted) {
+            setState(() => _currentIndex = index);
+          }
+        },
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -215,7 +243,11 @@ class _HomeScreenState extends State<HomeScreen> {
               if (index == 3) {
                 _showMoreMenu(context);
               } else {
-                setState(() => _currentIndex = index);
+                _pageController.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
               }
             },
             selectedItemColor: themeProvider.accentColor,

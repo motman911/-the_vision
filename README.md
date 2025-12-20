@@ -1,16 +1,31 @@
-# the_vision
+# تطبيق مكتب الرؤية - الدراسة في رواندا
 
-A new Flutter project.
+تطبيق Flutter متكامل لإدارة طلبات الدراسة في رواندا.
 
-## Getting Started
+## 📱 الميزات الرئيسية
 
-This project is a starting point for a Flutter application.
+- 🌐 **دعم متعدد اللغات**: العربية والإنجليزية
+- 🎨 **سمات متعددة**: فاتح، غامق، أزرق، أخضر، برتقالي
+- 📱 **تصميم متجاوب**: لجميع أحجام الشاشات
+- 📧 **نظام إرسال بريد**: مع مرفقات
+- 📄 **تحميل المستندات**: صور وPDF
+- 🏫 **معلومات الجامعات**: تفاصيل كاملة عن الجامعات الرواندية
+- ❓ **أسئلة وأجوبة**: شاملة ومحدثة
+- 📸 **معرض صور**: صور من رواندا والجامعات
+- 🛡️ **نظام أمان**: متغيرات بيئة وكلمات مرور آمنة
+- 🔗 **فحص اتصال**: تنبيه عند فقدان الإنترنت
+- 📊 **تحليلات**: تتبع استخدام التطبيق
 
-A few resources to get you started if this is your first Flutter project:
+## 🚀 البدء السريع
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### المتطلبات الأساسية
+- Flutter SDK 3.0.0 أو أعلى
+- Dart SDK 2.19.0 أو أعلى
+- IDE (Android Studio, VS Code)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### خطوات التنصيب
+
+1. **استنساخ المشروع**
+```bash
+git clone <repository-url>
+cd the_vision

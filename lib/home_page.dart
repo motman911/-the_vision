@@ -58,150 +58,162 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _refreshData() async {
+    await Future.delayed(const Duration(seconds: 1));
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final languageProvider = Provider.of<LanguageProvider>(context);
 
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        SliverToBoxAdapter(
-          child: Container(
-            height: 146,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/The_Vision_P1.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      color: themeProvider.primaryColor,
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverToBoxAdapter(
             child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.3),
-                    Colors.black.withOpacity(0.1),
-                  ],
+              height: 146,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/The_Vision_P1.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.3),
+                      Colors.black.withOpacity(0.1),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: languageProvider.isArabic
-                  ? CrossAxisAlignment.start
-                  : CrossAxisAlignment.end,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(bottom: 20),
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      SizedBox(
-                        height: 225,
-                        child: PageView(
-                          controller: _imageController,
-                          onPageChanged: (index) {
-                            setState(() {
-                              _currentImageIndex = index;
-                            });
-                          },
-                          children: [
-                            _buildImageCard('assets/images/The_Vision_P2.jpg',
-                                themeProvider),
-                            _buildImageCard(
-                                'assets/images/In_Rwanda_1.jpg', themeProvider),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 10,
-                        child: SmoothPageIndicator(
-                          controller: _imageController,
-                          count: 2,
-                          effect: WormEffect(
-                            dotHeight: 8,
-                            dotWidth: 8,
-                            activeDotColor: themeProvider.accentColor,
-                            dotColor: Colors.white70,
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: languageProvider.isArabic
+                    ? CrossAxisAlignment.start
+                    : CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        SizedBox(
+                          height: 225,
+                          child: PageView(
+                            controller: _imageController,
+                            onPageChanged: (index) {
+                              setState(() {
+                                _currentImageIndex = index;
+                              });
+                            },
+                            children: [
+                              _buildImageCard('assets/images/The_Vision_P2.jpg',
+                                  themeProvider),
+                              _buildImageCard('assets/images/In_Rwanda_1.jpg',
+                                  themeProvider),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        Positioned(
+                          bottom: 10,
+                          child: SmoothPageIndicator(
+                            controller: _imageController,
+                            count: 2,
+                            effect: WormEffect(
+                              dotHeight: 8,
+                              dotWidth: 8,
+                              activeDotColor: themeProvider.accentColor,
+                              dotColor: Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                _buildWelcomeCard(context, themeProvider, languageProvider),
-                const SizedBox(height: 24),
-                _buildSectionTitle(
-                    languageProvider.mainServices, themeProvider),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 130,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    reverse: !languageProvider.isArabic,
-                    children: [
-                      ServicePreviewCard(
-                        title: languageProvider.applyServices,
-                        icon: Icons.description,
-                        page: const ServicesPage(),
-                        themeProvider: themeProvider,
-                      ),
-                      ServicePreviewCard(
-                        title: languageProvider.afterAcceptance,
-                        icon: Icons.home_work,
-                        page: const ServicesPage(),
-                        themeProvider: themeProvider,
-                      ),
-                      ServicePreviewCard(
-                        title: languageProvider.studentSupport,
-                        icon: Icons.school,
-                        page: const ServicesPage(),
-                        themeProvider: themeProvider,
-                      ),
-                      ServicePreviewCard(
-                        title: languageProvider.academicConsultation,
-                        icon: Icons.lightbulb,
-                        page: const ServicesPage(),
-                        themeProvider: themeProvider,
-                      ),
-                    ],
+                  _buildWelcomeCard(context, themeProvider, languageProvider),
+                  const SizedBox(height: 24),
+                  _buildSectionTitle(
+                      languageProvider.mainServices, themeProvider),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 130,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      reverse: !languageProvider.isArabic,
+                      children: [
+                        ServicePreviewCard(
+                          title: languageProvider.applyServices,
+                          icon: Icons.description,
+                          page: const ServicesPage(),
+                          themeProvider: themeProvider,
+                        ),
+                        ServicePreviewCard(
+                          title: languageProvider.afterAcceptance,
+                          icon: Icons.home_work,
+                          page: const ServicesPage(),
+                          themeProvider: themeProvider,
+                        ),
+                        ServicePreviewCard(
+                          title: languageProvider.studentSupport,
+                          icon: Icons.school,
+                          page: const ServicesPage(),
+                          themeProvider: themeProvider,
+                        ),
+                        ServicePreviewCard(
+                          title: languageProvider.academicConsultation,
+                          icon: Icons.lightbulb,
+                          page: const ServicesPage(),
+                          themeProvider: themeProvider,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 28),
-                _buildSectionTitle(
-                    languageProvider.studyFeatures, themeProvider),
-                const SizedBox(height: 12),
-                ..._buildFeatureItems(themeProvider, languageProvider),
-                const SizedBox(height: 28),
-                _buildSectionTitle(languageProvider.livingCosts, themeProvider),
-                const SizedBox(height: 12),
-                _buildCostsGrid(themeProvider, languageProvider),
-                const SizedBox(height: 28),
-                _buildSectionTitle(
-                    languageProvider.testimonials, themeProvider),
-                const SizedBox(height: 12),
-                ..._buildTestimonials(themeProvider, languageProvider),
-                const SizedBox(height: 28),
-                _buildFAQCard(context, themeProvider, languageProvider),
-                _buildUniversitiesCard(
-                    context, themeProvider, languageProvider),
-                _buildGalleryCard(context, themeProvider, languageProvider),
-                const SizedBox(height: 20),
-                Center(
-                  child: WhatsAppButton(),
-                ),
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 28),
+                  _buildSectionTitle(
+                      languageProvider.studyFeatures, themeProvider),
+                  const SizedBox(height: 12),
+                  ..._buildFeatureItems(themeProvider, languageProvider),
+                  const SizedBox(height: 28),
+                  _buildSectionTitle(
+                      languageProvider.livingCosts, themeProvider),
+                  const SizedBox(height: 12),
+                  _buildCostsGrid(themeProvider, languageProvider),
+                  const SizedBox(height: 28),
+                  _buildSectionTitle(
+                      languageProvider.testimonials, themeProvider),
+                  const SizedBox(height: 12),
+                  ..._buildTestimonials(themeProvider, languageProvider),
+                  const SizedBox(height: 28),
+                  _buildFAQCard(context, themeProvider, languageProvider),
+                  _buildUniversitiesCard(
+                      context, themeProvider, languageProvider),
+                  _buildGalleryCard(context, themeProvider, languageProvider),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: WhatsAppButton(),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -247,7 +259,7 @@ class _HomePageState extends State<HomePage> {
           borderRadius: BorderRadius.circular(16.0),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(30.0),
           child: Column(
             children: [
               Text(
@@ -490,10 +502,10 @@ class _HomePageState extends State<HomePage> {
       ThemeProvider themeProvider, LanguageProvider languageProvider) {
     return [
       _buildTestimonial(
-        languageProvider.isArabic ? 'أحمد محمد' : 'Ahmed Mohamed',
+        languageProvider.isArabic ? 'محمد اشرف' : 'Mohamed Ashraf',
         languageProvider.isArabic
-            ? 'تجربة رائعة مع The Vision، ساعدوني في الحصول على قبول في جامعة رواندا'
-            : 'Great experience with The Vision, they helped me get accepted at Rwanda University',
+            ? 'مكتب الرؤية غير مجرد مكتب استشارات، هم عائلة داعمة. من لحظة التواصل الأولى حتى وصولي إلى رواندا، شعروا بمسؤوليتي كأخ كبير. ما يميزهم هو المتابعة المستمرة بعد الوصول ومساعدتهم في حل أي مشكلة تواجهني.'
+            : 'The Vision Office is more than just a consultancy, they are a supportive family. From the first contact until my arrival in Rwanda, they made me feel like an older brother. What sets them apart is the continuous follow-up after arrival and their help in solving any problem I face.',
         themeProvider,
         rating: 5,
       ),
@@ -506,10 +518,10 @@ class _HomePageState extends State<HomePage> {
         rating: 4,
       ),
       _buildTestimonial(
-        languageProvider.isArabic ? 'يوسف حسن' : 'Youssef Hassan',
+        languageProvider.isArabic ? 'عثمان محمد' : 'Othman Mohamed',
         languageProvider.isArabic
-            ? 'تكاليف المعيشة مناسبة والجامعات ممتازة في رواندا'
-            : 'Living costs are reasonable and universities are excellent in Rwanda',
+            ? 'تجربتي مع مكتب الرؤية كانت ممتازة بكل المقاييس. ساعدوني في اختيار التخصص المناسب، وجمع المستندات، وحتى بعد وصولي لم يتركوني وحيداً. ساعدوني وأسرتي في إيجاد سكن مناسب وقريب من الجامعة. أنصح أي طالب يريد الدراسة في رواندا بالتعامل معهم.'
+            : 'My experience with The Vision Office was excellent in every way. They helped me choose the right major, gather documents, and even after my arrival, they did not leave me alone. They helped me find suitable accommodation close to the university. I recommend anyone who wants to study in Rwanda to deal with them.',
         themeProvider,
         rating: 5,
       ),

@@ -1,15 +1,25 @@
+// ignore_for_file: avoid_print
+
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'splash_screen.dart';
-// ignore: unused_import
-import 'home_screen.dart';
 import 'theme_provider.dart';
 import 'l10n/language_provider.dart';
+// ✅ استبدل env_config بـ app_config
+import 'app_config.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  print('🚀 بدء تشغيل تطبيق مكتب الرؤية...');
+  print('📁 المسار الحالي: ${Directory.current.path}');
+
+  // ✅ استخدام AppConfig مباشرة
+  AppConfig.printConfig();
+
   runApp(const TheVisionApp());
 }
 
@@ -26,7 +36,7 @@ class TheVisionApp extends StatelessWidget {
       child: Consumer2<ThemeProvider, LanguageProvider>(
         builder: (context, themeProvider, languageProvider, child) {
           return MaterialApp(
-            title: languageProvider.appTitle,
+            title: '${AppConfig.appName} - الدراسة في رواندا',
             theme: themeProvider.currentThemeData,
             debugShowCheckedModeBanner: false,
             locale: languageProvider.currentLocale,

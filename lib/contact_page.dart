@@ -7,6 +7,9 @@ import 'package:file_picker/file_picker.dart';
 import 'theme_provider.dart';
 import 'l10n/language_provider.dart';
 import 'email_service.dart';
+import 'error_handler.dart';
+import 'connectivity_service.dart';
+import 'app_analytics.dart';
 
 class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
@@ -31,6 +34,7 @@ class _ContactPageState extends State<ContactPage>
   File? pdfFile;
 
   bool isSending = false;
+  bool _isOnline = true;
 
   final ImagePicker _picker = ImagePicker();
   late AnimationController _animController;
@@ -45,6 +49,12 @@ class _ContactPageState extends State<ContactPage>
     );
     _fadeAnim = Tween<double>(begin: 0, end: 1).animate(_animController);
     _animController.forward();
+
+    // التحقق من الاتصال
+    _checkConnectivity();
+
+    // تسجيل مشاهدة الصفحة
+    AppAnalytics.logScreenView('Contact Page');
   }
 
   @override
@@ -55,6 +65,16 @@ class _ContactPageState extends State<ContactPage>
     _phoneController.dispose();
     _whatsappController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkConnectivity() async {
+    try {
+      _isOnline = await ConnectivityService.isConnected();
+      setState(() {});
+    } catch (e) {
+      _isOnline = false;
+      setState(() {});
+    }
   }
 
   void _showImageSourceDialog(BuildContext context, String type) {
@@ -87,40 +107,57 @@ class _ContactPageState extends State<ContactPage>
   }
 
   Future<void> _pickImage(ImageSource source, String type) async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: source, imageQuality: 80);
-    if (pickedFile != null) {
+    try {
+      final XFile? pickedFile =
+          await _picker.pickImage(source: source, imageQuality: 80);
+      if (pickedFile != null) {
+        if (mounted) {
+          setState(() {
+            switch (type) {
+              case 'passport':
+                passportImage = File(pickedFile.path);
+                break;
+              case 'personal':
+                personalPhoto = File(pickedFile.path);
+                break;
+              case 'certificateFront':
+                certificateFront = File(pickedFile.path);
+                break;
+              case 'certificateBack':
+                certificateBack = File(pickedFile.path);
+                break;
+            }
+          });
+        }
+        AppAnalytics.logButtonClick('Pick Image - $type');
+      }
+    } catch (e) {
+      AppAnalytics.logError('Image Picker', e);
       if (mounted) {
-        setState(() {
-          switch (type) {
-            case 'passport':
-              passportImage = File(pickedFile.path);
-              break;
-            case 'personal':
-              personalPhoto = File(pickedFile.path);
-              break;
-            case 'certificateFront':
-              certificateFront = File(pickedFile.path);
-              break;
-            case 'certificateBack':
-              certificateBack = File(pickedFile.path);
-              break;
-          }
-        });
+        AppErrorHandler.handleError(context, e);
       }
     }
   }
 
   Future<void> _pickPDF() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-    );
-    if (result != null && result.files.single.path != null) {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        allowMultiple: false,
+      );
+      if (result != null && result.files.single.path != null) {
+        if (mounted) {
+          setState(() {
+            pdfFile = File(result.files.single.path!);
+          });
+        }
+        AppAnalytics.logButtonClick('Pick PDF');
+      }
+    } catch (e) {
+      AppAnalytics.logError('File Picker', e);
       if (mounted) {
-        setState(() {
-          pdfFile = File(result.files.single.path!);
-        });
+        AppErrorHandler.handleError(context, e);
       }
     }
   }
@@ -178,12 +215,23 @@ class _ContactPageState extends State<ContactPage>
     );
   }
 
-  void _sendData(BuildContext context) {
+  Future<void> _sendData(BuildContext context) async {
     if (isSending || !mounted) return;
 
+    // ignore: unused_local_variable
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final languageProvider =
         Provider.of<LanguageProvider>(context, listen: false);
+
+    // التحقق من الاتصال
+    if (!_isOnline) {
+      AppErrorHandler.handleError(
+        context,
+        'لا يوجد اتصال بالإنترنت',
+        customMessage: 'يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى',
+      );
+      return;
+    }
 
     if (!_formKey.currentState!.validate()) {
       return;
@@ -192,78 +240,117 @@ class _ContactPageState extends State<ContactPage>
     if (passportImage == null ||
         personalPhoto == null ||
         certificateFront == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(languageProvider.isArabic
-              ? 'الحقول الأساسية غير مكتملة!'
-              : 'Required fields are incomplete!'),
-          backgroundColor: Colors.red,
-        ),
+      AppErrorHandler.showWarning(
+        context,
+        languageProvider.isArabic
+            ? 'الحقول الأساسية غير مكتملة!'
+            : 'Required fields are incomplete!',
       );
       return;
     }
 
+    // عرض تأكيد الإرسال
+    final shouldSend = await AppErrorHandler.showConfirmDialog(
+      context,
+      title: languageProvider.isArabic ? 'تأكيد الإرسال' : 'Confirm Send',
+      message: languageProvider.isArabic
+          ? 'هل أنت متأكد من إرسال البيانات؟'
+          : 'Are you sure you want to send the data?',
+      confirmText: languageProvider.isArabic ? 'إرسال' : 'Send',
+      cancelText: languageProvider.isArabic ? 'إلغاء' : 'Cancel',
+    );
+
+    if (!shouldSend) return;
+
     setState(() => isSending = true);
 
-    Future.microtask(() async {
-      try {
-        await sendEmail(
-          _nameController.text,
-          pdfFile,
-          passportImage!,
-          personalPhoto!,
-          certificateFront!,
-          certificateBack,
-          phone: _phoneController.text,
-          whatsapp: _whatsappController.text,
-          email: _emailController.text,
-          country: selectedCountry,
-        );
+    try {
+      await sendEmail(
+        _nameController.text,
+        pdfFile,
+        passportImage!,
+        personalPhoto!,
+        certificateFront!,
+        certificateBack,
+        phone: _phoneController.text,
+        whatsapp: _whatsappController.text,
+        email: _emailController.text,
+        country: selectedCountry,
+      );
 
-        if (!mounted) return;
+      AppAnalytics.logFormSubmission('Contact Form');
+      AppAnalytics.logEmailSent('Vision Office');
 
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(languageProvider.isArabic
-                ? 'تم استلام البيانات! سنتواصل معك'
-                : 'Data received! We will contact you'),
-            backgroundColor: themeProvider.primaryColor,
-          ),
-        );
+      if (!mounted) return;
 
-        _nameController.clear();
-        _emailController.clear();
-        _phoneController.clear();
-        _whatsappController.clear();
+      AppErrorHandler.showSuccess(
+        context,
+        languageProvider.isArabic
+            ? 'تم استلام البيانات بنجاح! سنتواصل معك قريباً'
+            : 'Data received successfully! We will contact you soon',
+      );
 
-        if (mounted) {
-          setState(() {
-            passportImage = null;
-            personalPhoto = null;
-            certificateFront = null;
-            certificateBack = null;
-            pdfFile = null;
-          });
-        }
-      } catch (e) {
-        if (mounted) {
-          // ignore: use_build_context_synchronously
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(languageProvider.isArabic
-                  ? 'حدث خطأ أثناء إرسال البيانات: $e'
-                  : 'An error occurred while sending data: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() => isSending = false);
-        }
+      // إعادة تعيين النموذج
+      _nameController.clear();
+      _emailController.clear();
+      _phoneController.clear();
+      _whatsappController.clear();
+
+      if (mounted) {
+        setState(() {
+          passportImage = null;
+          personalPhoto = null;
+          certificateFront = null;
+          certificateBack = null;
+          pdfFile = null;
+          selectedCountry = 'SD';
+        });
       }
-    });
+    } catch (e) {
+      AppAnalytics.logError('Email Service', e);
+      if (mounted) {
+        AppErrorHandler.handleError(
+          context,
+          e,
+          customMessage: languageProvider.isArabic
+              ? 'حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى'
+              : 'An error occurred while sending data. Please try again',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isSending = false);
+      }
+    }
+  }
+
+  Widget _buildConnectionStatus() {
+    if (_isOnline) return const SizedBox();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.orange[50],
+        border: Border.all(color: Colors.orange),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi_off, color: Colors.orange),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'أنت غير متصل بالإنترنت. بعض الميزات قد لا تعمل.',
+              style: TextStyle(
+                color: Colors.orange[800],
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -271,16 +358,6 @@ class _ContactPageState extends State<ContactPage>
     return Consumer2<ThemeProvider, LanguageProvider>(
       builder: (context, themeProvider, languageProvider, child) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              languageProvider.contactUs,
-              style: const TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            backgroundColor: themeProvider.primaryColor,
-            foregroundColor: Colors.white,
-            centerTitle: true,
-            elevation: 4,
-          ),
           body: FadeTransition(
             opacity: _fadeAnim,
             child: SingleChildScrollView(
@@ -300,7 +377,20 @@ class _ContactPageState extends State<ContactPage>
                         color: themeProvider.primaryColor,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      languageProvider.isArabic
+                          ? 'املأ النموذج التالي وسنتواصل معك في أقرب وقت'
+                          : 'Fill the form below and we will contact you soon',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
                     const SizedBox(height: 16),
+
+                    // حالة الاتصال
+                    _buildConnectionStatus(),
 
                     // الاسم (اجباري)
                     Row(
@@ -324,9 +414,10 @@ class _ContactPageState extends State<ContactPage>
                           borderRadius: BorderRadius.circular(12),
                         ),
                         hintText: languageProvider.isArabic
-                            ? 'ادخل اسمك'
-                            : 'Enter your name',
+                            ? 'ادخل اسمك الكامل'
+                            : 'Enter your full name',
                         contentPadding: const EdgeInsets.all(16),
+                        prefixIcon: const Icon(Icons.person),
                       ),
                       validator: (value) => value == null || value.isEmpty
                           ? (languageProvider.isArabic
@@ -363,6 +454,7 @@ class _ContactPageState extends State<ContactPage>
                             ? 'ادخل رقم الواتساب'
                             : 'Enter WhatsApp number',
                         contentPadding: const EdgeInsets.all(16),
+                        prefixIcon: const Icon(Icons.phone),
                       ),
                       keyboardType: TextInputType.phone,
                       validator: (value) => _validateWhatsApp(value, context),
@@ -380,6 +472,7 @@ class _ContactPageState extends State<ContactPage>
                           borderRadius: BorderRadius.circular(12),
                         ),
                         contentPadding: const EdgeInsets.all(16),
+                        prefixIcon: const Icon(Icons.phone_android),
                       ),
                       keyboardType: TextInputType.phone,
                     ),
@@ -396,6 +489,7 @@ class _ContactPageState extends State<ContactPage>
                           borderRadius: BorderRadius.circular(12),
                         ),
                         contentPadding: const EdgeInsets.all(16),
+                        prefixIcon: const Icon(Icons.email),
                       ),
                       keyboardType: TextInputType.emailAddress,
                     ),
@@ -445,6 +539,7 @@ class _ContactPageState extends State<ContactPage>
                           borderRadius: BorderRadius.circular(12),
                         ),
                         contentPadding: const EdgeInsets.all(16),
+                        prefixIcon: const Icon(Icons.flag),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -519,15 +614,22 @@ class _ContactPageState extends State<ContactPage>
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
-                        pdfFile != null
-                            ? (languageProvider.isArabic
-                                ? 'PDF محدد: ${pdfFile!.path.split('/').last}'
-                                : 'PDF Selected: ${pdfFile!.path.split('/').last}')
-                            : (languageProvider.isArabic
-                                ? 'رفع PDF (اختياري)'
-                                : 'Upload PDF (Optional)'),
-                        style: const TextStyle(fontSize: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.picture_as_pdf),
+                          const SizedBox(width: 8),
+                          Text(
+                            pdfFile != null
+                                ? (languageProvider.isArabic
+                                    ? 'PDF محدد: ${pdfFile!.path.split('/').last}'
+                                    : 'PDF Selected: ${pdfFile!.path.split('/').last}')
+                                : (languageProvider.isArabic
+                                    ? 'رفع PDF (اختياري)'
+                                    : 'Upload PDF (Optional)'),
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -547,19 +649,66 @@ class _ContactPageState extends State<ContactPage>
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: Text(
-                          isSending
-                              ? (languageProvider.isArabic
-                                  ? 'جاري الإرسال...'
-                                  : 'Sending...')
-                              : (languageProvider.isArabic
-                                  ? 'إرسال البيانات'
-                                  : 'Send Data'),
-                          style: const TextStyle(fontSize: 16),
-                        ),
+                        child: isSending
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    languageProvider.isArabic
+                                        ? 'جاري الإرسال...'
+                                        : 'Sending...',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                languageProvider.isArabic
+                                    ? 'إرسال البيانات'
+                                    : 'Send Data',
+                                style: const TextStyle(fontSize: 16),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 20),
+
+                    // معلومات إضافية
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: themeProvider.primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info,
+                            color: themeProvider.primaryColor,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              languageProvider.isArabic
+                                  ? 'سنقوم بالتواصل معك عبر الواتساب خلال 24 ساعة'
+                                  : 'We will contact you via WhatsApp within 24 hours',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: themeProvider.textColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

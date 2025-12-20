@@ -57,11 +57,11 @@ class _SplashScreenState extends State<SplashScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 120, // حجم ثابت
-                  height: 120, // حجم ثابت
+                  width: 120,
+                  height: 120,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20), // حجم ثابت
+                    borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -72,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                   child: Icon(
                     Icons.school,
-                    size: 60, // حجم ثابت
+                    size: 60,
                     color: const Color(0xFF0f766e),
                   ),
                 ),
@@ -97,8 +97,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 40),
                 SizedBox(
-                  width: 30, // حجم ثابت
-                  height: 30, // حجم ثابت
+                  width: 30,
+                  height: 30,
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
                     color: Colors.white,
