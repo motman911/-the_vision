@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'favorites_provider.dart';
@@ -21,24 +23,8 @@ class FavoritesPage extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: themeProvider.scaffoldBackgroundColor,
-          appBar: AppBar(
-            title: Text(
-              languageProvider.isArabic ? 'المفضلة ❤️' : 'Favorites ❤️',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            centerTitle: true,
-            backgroundColor: themeProvider.primaryColor,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(
-                languageProvider.isArabic
-                    ? Icons.arrow_back_ios
-                    : Icons.arrow_back_ios_new,
-                color: Colors.white,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
+          // ❌ تم إزالة AppBar من هنا لأنه موجود في HomeScreen
+
           body: favoriteUniversities.isEmpty
               ? _buildEmptyState(context, themeProvider, languageProvider)
               : ListView.builder(
@@ -54,7 +40,7 @@ class FavoritesPage extends StatelessWidget {
                           DismissDirection.endToStart, // السحب لليسار للحذف
                       background: _buildDismissBackground(),
                       onDismissed: (direction) {
-                        // 1. الحذف من البروفايدر (تم التصحيح: إرسال id مباشرة كنص)
+                        // 1. الحذف من البروفايدر
                         favoritesProvider.toggleFavorite(uni.id);
 
                         // 2. إظهار رسالة مع زر تراجع
@@ -148,18 +134,17 @@ class FavoritesPage extends StatelessWidget {
                   color: theme.subTextColor, fontSize: 16, height: 1.5),
             ),
             const SizedBox(height: 30),
+            // لاحظ: زر التصفح هنا قد لا ينقلك للتبويب الآخر تلقائياً إلا باستخدام Controller
+            // لذا يمكن جعله يظهر رسالة توجيهية أو محاولة الانتقال
             ElevatedButton.icon(
               onPressed: () {
-                // العودة للصفحة السابقة أو الذهاب للجامعات
-                if (Navigator.canPop(context)) {
-                  Navigator.pop(context);
-                } else {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const UniversitiesPage()),
-                  );
-                }
+                // بما أننا في Tab، الأفضل ترك المستخدم يضغط على تبويب "الجامعات" بالأسفل
+                // أو يمكننا استخدام PushReplacement كحل مؤقت
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const UniversitiesPage()),
+                );
               },
               icon: const Icon(Icons.search),
               label:

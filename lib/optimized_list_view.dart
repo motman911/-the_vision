@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // تأكد من إضافة هذا الباكيج
 
 class OptimizedListView extends StatefulWidget {
   final List<Map<String, dynamic>> items;
@@ -50,8 +51,9 @@ class _OptimizedListViewState extends State<OptimizedListView> {
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels ==
-            _scrollController.position.maxScrollExtent &&
+    // تحميل استباقي عند الوصول لـ 90% من القائمة لتجربة أكثر سلاسة
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent * 0.9 &&
         _hasMore &&
         !_isLoading) {
       _loadMoreItems();
@@ -63,7 +65,6 @@ class _OptimizedListViewState extends State<OptimizedListView> {
 
     setState(() => _isLoading = true);
 
-    // محاكاة تأخير للشبكة
     await Future.delayed(const Duration(milliseconds: 500));
 
     final start = _currentPage * widget.pageSize;
@@ -81,14 +82,17 @@ class _OptimizedListViewState extends State<OptimizedListView> {
       end < widget.items.length ? end : widget.items.length,
     );
 
-    setState(() {
-      _visibleItems.addAll(newItems);
-      _currentPage++;
-      _isLoading = false;
-      _hasMore = end < widget.items.length;
-    });
+    if (mounted) {
+      setState(() {
+        _visibleItems.addAll(newItems);
+        _currentPage++;
+        _isLoading = false;
+        _hasMore = end < widget.items.length;
+      });
+    }
   }
 
+  // دالة مفيدة لإعادة تحميل القائمة
   void refresh() {
     setState(() {
       _visibleItems.clear();
@@ -105,21 +109,29 @@ class _OptimizedListViewState extends State<OptimizedListView> {
       return widget.emptyWidget ??
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(40.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.inbox,
-                    size: 64,
-                    color: Colors.grey[400],
+                  Container(
+                    padding: const EdgeInsets.all(25),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.inbox_outlined,
+                      size: 60,
+                      color: Colors.grey.shade400,
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   Text(
-                    'لا توجد عناصر لعرضها',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 16,
+                    'لا توجد عناصر لعرضها حالياً',
+                    style: GoogleFonts.tajawal(
+                      color: Colors.grey.shade600,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -131,29 +143,29 @@ class _OptimizedListViewState extends State<OptimizedListView> {
     return ListView.builder(
       controller: _scrollController,
       shrinkWrap: widget.shrinkWrap,
-      padding: widget.padding,
+      padding: widget.padding ?? const EdgeInsets.symmetric(vertical: 10),
       itemCount: _visibleItems.length + (_hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == _visibleItems.length) {
-          return _hasMore && widget.showLoadingIndicator
-              ? Container(
-                  padding: const EdgeInsets.all(16),
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              : Container(
-                  padding: const EdgeInsets.all(16),
-                  child: Center(
-                    child: Text(
-                      'تم عرض جميع العناصر',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
+          return Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Center(
+              child: _hasMore && widget.showLoadingIndicator
+                  ? const SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    )
+                  : Text(
+                      'تم عرض جميع النتائج ✨',
+                      style: GoogleFonts.tajawal(
+                        color: Colors.grey.shade500,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                );
+            ),
+          );
         }
         return widget.itemBuilder(context, _visibleItems[index], index);
       },

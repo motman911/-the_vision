@@ -3,7 +3,7 @@ description: تطبيق مكتب الرؤية للدراسة في رواندا
 
 publish_to: 'none'
 
-version: 1.2.0+3
+version: 1.2.0+4
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -12,106 +12,64 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_dotenv: ^5.1.0
-  google_fonts: ^6.1.0
-  share_plus: ^7.2.1
+  # Utilities & Assets
+  flutter_dotenv: ^6.0.0
+  google_fonts: ^6.2.1
+  share_plus: ^12.0.1
+  path_provider: ^2.1.4 # أضفتها لك لأنها ضرورية للتعامل مع الملفات والصور
 
   # State Management & Providers
-  provider: ^6.1.1
-  shared_preferences: ^2.1.1
-  
+  provider: ^6.1.2
+  shared_preferences: ^2.3.2
+
   # UI & Navigation
   smooth_page_indicator: ^2.0.1
   photo_view: ^0.15.0
-  font_awesome_flutter: ^10.12.0
-  
+  font_awesome_flutter: ^10.7.0
+
   # File & Media Handling
-  file_picker: ^10.3.7
-  image_picker: ^0.8.7
-  flutter_image_compress: ^2.4.0
-  cached_network_image: ^3.3.0
-  
+  file_picker: ^10.3.8
+  image_picker: ^1.1.2
+  flutter_image_compress: ^2.3.0
+  cached_network_image: ^3.4.1
+
   # Networking & Communications
-  url_launcher: ^6.3.2
-  mailer: ^6.2.5
+  url_launcher: ^6.3.0
+  mailer: ^6.0.0
   http: ^1.2.2
-  
-  # Localization & Internationalization
+
+  # 🔥 مكتبات الفايربيس والمصادقة (أحدث إصدارات)
+  firebase_core: ^4.3.0
+  firebase_auth: ^6.1.3
+  cloud_firestore: ^6.1.1
+  firebase_storage: ^13.0.5
+
+  # Localization
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
-  
-  # Connectivity
-  connectivity_plus: ^4.0.2
-  
-  # Performance
-  flutter_cache_manager: ^3.3.3
+
+  # Connectivity & Performance
+  connectivity_plus: ^7.0.0
+  flutter_cache_manager: ^3.4.1
+  firebase_messaging: ^16.1.0
+  google_sign_in: ^6.1.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
-  # 👇 مكتبة توليد الأيقونات
-  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
+  
   assets:
-    # ✅ إضافة ملف البيئة للأصول
     - .env
-    
-    # Images
     - assets/images/
-    - assets/images/The_Vision_P1.jpg
-    - assets/images/The_Vision_P2.jpg
-    - assets/images/In_Rwanda_1.jpg
-    - assets/images/In_Rwanda_2.jpg
-    - assets/images/In_Rwanda_3.jpg
-    - assets/images/In_Rwanda_4.jpg
-    - assets/images/In_Rwanda_5.jpg
-    - assets/images/In_Rwanda_6.jpg
-    - assets/images/In_Rwanda_7.jpg
-    - assets/images/In_Rwanda_8.jpg
-    - assets/images/In_Rwanda_9.jpg
-    - assets/images/In_Rwanda_10.jpg
-    
-    # ULK University Images
-    - assets/images/ULK_P1.webp
-    - assets/images/ULK_P2.jpeg
-    - assets/images/ULK_P3.jpg
-    - assets/images/ULK_P4.jpg
-    - assets/images/ULK_P5.jpg
-    - assets/images/ULK_P6.jpg
-    - assets/images/ULK_PL1.jpg
-    - assets/images/ULK_PL2.jpg
-    
-    # UoK University Images
-    - assets/images/UoK_P1.jpg
-    - assets/images/UoK_P2.jpg
-    - assets/images/UoK_P3.jpg
-    - assets/images/UoK_P4.jpg
-    - assets/images/UoK_P5.jpg
-    
-    # UNILAK University Images
-    - assets/images/UNLAK_P1.jpg
-    - assets/images/UNLAK_P2.jpg
-    - assets/images/UNLAK_P3.jpg
-    
-    # INES University Images
-    - assets/images/INES_P1.jpeg
-    - assets/images/INES_P2.jpeg
-    - assets/images/INES_P3.jpg
-    
-    # UR University Images
-    - assets/images/UR_P1.jpeg
-    - assets/images/UR_P2.jpeg
-    - assets/images/UR_P4.jpg
-    - assets/images/UR_P5.jpg
-    - assets/images/UR_P6.jpg
 
-# 👇 إعدادات توليد الأيقونة
 flutter_launcher_icons:
-  android: "launcher_icon"
+  android: "ic_launcher"
   ios: true
-  image_path: "assets/images/icon.png" # ⚠️ تأكد من وضع صورة اللوجو بهذا الاسم
+  image_path: "assets/images/icon.png"
   min_sdk_android: 21

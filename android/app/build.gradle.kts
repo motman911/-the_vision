@@ -2,13 +2,21 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
 android {
-    // 🔧 غير هذا السطر - يجب أن يكون نفس applicationId
-    namespace = "com.sks.vision"  // غير من "com.example.the_vision"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    namespace = "com.sks.vision"
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId = "com.sks.vision" // 👈 تأكد أن هذا هو نفس الاسم المسجل في فايربيس
+        minSdk = flutter.minSdkVersion
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0.0"
+        multiDexEnabled = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -16,20 +24,13 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
-    defaultConfig {
-        applicationId = "com.sks.vision"  // ✅ هذا صحيح
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = 1  // 🔧 أضف قيمة ثابتة
-        versionName = "1.0.0"  // 🔧 أضف قيمة ثابتة
+        jvmTarget = "17"
     }
 
     signingConfigs {
         create("release") {
-            // ملف keystore يكون داخل android/app
+            // هذا الإعداد سنحتاجه لاحقاً عند رفع التطبيق للمتجر
+            // حالياً قد يسبب خطأ إذا لم يكن الملف موجوداً، لكن سأتركه كما هو
             storeFile = file("app-release.keystore")
             storePassword = "Skimo590"
             keyAlias = "upload"
@@ -44,11 +45,12 @@ android {
             isShrinkResources = false
         }
         debug {
-            signingConfig = signingConfigs.getByName("release")
+            // 🔥 التعديل هنا: حذفنا سطر التوقيع لكي يستخدم مفتاح الـ Debug الافتراضي
+            // signingConfig = signingConfigs.getByName("release") ❌
         }
     }
 }
 
-flutter {
-    source = "../.."
+dependencies {
+    implementation("androidx.multidex:multidex:2.0.1")
 }

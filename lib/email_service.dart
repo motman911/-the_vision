@@ -7,6 +7,7 @@ import 'package:mailer/smtp_server.dart';
 import 'app_config.dart';
 
 class EmailService {
+  // 📧 1. دالة إرسال "تواصل معنا" (للاستفسارات العامة)
   static Future<void> sendEmail({
     required String name,
     required File passport,
@@ -20,62 +21,104 @@ class EmailService {
     String? country,
   }) async {
     try {
-      final String username = AppConfig.emailUsername;
-      final String password = AppConfig.emailPassword;
-
-      if (username.isEmpty || password.isEmpty) {
-        if (kDebugMode) {
-          print('⚠️ تحذير: إعدادات البريد غير مكتملة في AppConfig');
-        }
-      }
-
-      final smtpServer = gmail(username, password);
-
-      // تاريخ ووقت الإرسال
+      final smtpServer = _getSmtpServer();
       final now = DateTime.now();
       final formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
 
-      // إنشاء الرسالة
       final message = Message()
-        ..from = Address(username, AppConfig.emailSenderName)
-        ..recipients.add(username) // إرسال لنفس البريد (للمكتب)
-        ..subject = '📋 طلب جديد - $name'
-        ..html = _createHtmlMessage(
+        ..from = Address(AppConfig.emailUsername, AppConfig.emailSenderName)
+        ..recipients.add(AppConfig.emailUsername)
+        ..subject = '🔵 استفسار جديد - $name'
+        ..html = _createContactHtml(
           name: name,
           phone: phone,
           whatsapp: whatsapp,
           email: email,
           country: country,
           dateTime: formattedDate,
-          hasCertificateBack: certificateBack != null,
-          hasPdfFile: pdfFile != null,
         );
 
-      // إضافة المرفقات
-      _addAttachment(message, passport, '${name}_جواز_السفر.jpg');
-      _addAttachment(message, personalPhoto, '${name}_صورة_شخصية.jpg');
+      // المرفقات مع تطهير الأسماء
+      _addAttachment(message, passport, '${name}_جواز.jpg');
+      _addAttachment(message, personalPhoto, '${name}_صورة.jpg');
       _addAttachment(message, certificateFront, '${name}_شهادة_أمام.jpg');
 
       if (certificateBack != null) {
         _addAttachment(message, certificateBack, '${name}_شهادة_خلف.jpg');
       }
-
       if (pdfFile != null) {
-        _addAttachment(message, pdfFile, '${name}_مستندات_إضافية.pdf');
+        _addAttachment(message, pdfFile, '${name}_مستندات.pdf');
       }
 
-      // إرسال الرسالة
-      final sendReport = await send(message, smtpServer);
-
-      if (kDebugMode) {
-        print('✅ تم إرسال البريد بنجاح: ${sendReport.toString()}');
-      }
+      await send(message, smtpServer);
+      if (kDebugMode) print('✅ تم إرسال طلب التواصل بنجاح');
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ خطأ في إرسال البريد: $e');
-      }
+      if (kDebugMode) print('❌ خطأ في الإرسال: $e');
       rethrow;
     }
+  }
+
+  // 🎓 2. دالة إرسال "طلب المعادلة" (المحسنة)
+  static Future<void> sendEquivalenceRequest({
+    required String studentName,
+    required String motherName,
+    required String whatsapp,
+    required String paymentMethod, // momo, binance, bankak
+    required String transactionInfo,
+    required File passport,
+    required File paymentScreenshot,
+    File? certificatePdf,
+    File? certificateFront,
+    File? certificateBack,
+  }) async {
+    try {
+      final smtpServer = _getSmtpServer();
+      final now = DateTime.now();
+      final formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+
+      final message = Message()
+        ..from = Address(AppConfig.emailUsername, AppConfig.emailSenderName)
+        ..recipients.add(AppConfig.emailUsername)
+        ..subject = '🟢 طلب معادلة جديد - $studentName'
+        ..html = _createEquivalenceHtml(
+          studentName: studentName,
+          motherName: motherName,
+          whatsapp: whatsapp,
+          paymentMethod: paymentMethod,
+          transactionInfo: transactionInfo,
+          dateTime: formattedDate,
+        );
+
+      // المرفقات الأساسية لطلب المعادلة
+      _addAttachment(message, passport, '1_جواز_السفر.jpg');
+      _addAttachment(message, paymentScreenshot, '2_إيصال_الدفع.jpg');
+
+      // مرفقات الشهادة (PDF أو صور)
+      if (certificatePdf != null) {
+        _addAttachment(message, certificatePdf, '3_الشهادة_الدراسية.pdf');
+      } else {
+        if (certificateFront != null) {
+          _addAttachment(message, certificateFront, '3_الشهادة_أمام.jpg');
+        }
+        if (certificateBack != null) {
+          _addAttachment(message, certificateBack, '4_الشهادة_خلف.jpg');
+        }
+      }
+
+      await send(message, smtpServer);
+      if (kDebugMode) print('✅ تم إرسال طلب المعادلة بنجاح');
+    } catch (e) {
+      if (kDebugMode) print('❌ خطأ في إرسال المعادلة: $e');
+      rethrow;
+    }
+  }
+
+  // 🛠️ دوال مساعدة (Helpers)
+
+  static SmtpServer _getSmtpServer() {
+    final String username = AppConfig.emailUsername;
+    final String password = AppConfig.emailPassword;
+    return gmail(username, password);
   }
 
   static void _addAttachment(Message message, File file, String fileName) {
@@ -87,172 +130,78 @@ class EmailService {
   }
 
   static String _sanitizeFileName(String fileName) {
+    // إزالة الرموز غير المسموحة في أسماء الملفات لضمان وصولها
     return fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
   }
 
-  static String _createHtmlMessage({
+  // 📄 HTML Template: تواصل معنا
+  static String _createContactHtml({
     required String name,
     required String? phone,
     required String whatsapp,
     required String? email,
     required String? country,
     required String dateTime,
-    required bool hasCertificateBack,
-    required bool hasPdfFile,
   }) {
-    final countryNames = {
-      'SD': '🇸🇩 السودان',
-      'SY': '🇸🇾 سوريا',
-      'YE': '🇾🇪 اليمن',
-      'SS': '🇸🇸 جنوب السودان',
-      'TD': '🇹🇩 تشاد',
-    };
-
-    final countryName = countryNames[country] ?? country ?? 'غير محدد';
-
-    final phoneHtml = phone != null && phone.isNotEmpty
-        ? '''
-    <div class="info-item">
-        <div class="info-label">📱 رقم الهاتف</div>
-        <div class="info-value">$phone</div>
+    return '''
+<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
+        <h2 style="margin: 0;">📋 استفسار جديد من التطبيق</h2>
+        <p style="font-size: 14px; margin-top: 5px; opacity: 0.9;">التوقيت: $dateTime</p>
     </div>
-    '''
-        : '';
-
-    final emailHtml = email != null && email.isNotEmpty
-        ? '''
-    <div class="info-item">
-        <div class="info-label">📧 البريد الإلكتروني</div>
-        <div class="info-value">$email</div>
+    <div style="padding: 20px; line-height: 1.6; color: #333;">
+        <p><b>👤 الاسم:</b> $name</p>
+        <p><b>🌍 الدولة:</b> ${country ?? 'غير محدد'}</p>
+        <p><b>✅ واتساب:</b> <a href="https://wa.me/${whatsapp.replaceAll('+', '')}" style="color: #25D366; text-decoration: none;">$whatsapp</a></p>
+        <p><b>📞 الهاتف:</b> ${phone ?? '-'}</p>
+        <p><b>📧 البريد الإلكتروني:</b> ${email ?? '-'}</p>
     </div>
-    '''
-        : '';
+    <div style="background-color: #f8f9fa; padding: 10px; text-align: center; font-size: 12px; color: #777;">
+        تم الإرسال عبر نظام البريد التلقائي لـ ${AppConfig.appName}
+    </div>
+</div>
+''';
+  }
 
-    final certificateBackHtml = hasCertificateBack
-        ? '''
-    <li class="attachment-item">
-        <span class="attachment-icon">📄</span>
-        <span>${name}_شهادة_خلف.jpg <span class="badge">اختياري</span></span>
-    </li>
-    '''
-        : '';
-
-    final pdfFileHtml = hasPdfFile
-        ? '''
-    <li class="attachment-item">
-        <span class="attachment-icon">📄</span>
-        <span>${name}_مستندات.pdf <span class="badge">اختياري</span></span>
-    </li>
-    '''
-        : '';
+  // 📄 HTML Template: المعادلة
+  static String _createEquivalenceHtml({
+    required String studentName,
+    required String motherName,
+    required String whatsapp,
+    required String paymentMethod,
+    required String transactionInfo,
+    required String dateTime,
+  }) {
+    String methodTitle = paymentMethod;
+    if (paymentMethod == 'momo') methodTitle = 'MoMo Pay (Rwanda)';
+    if (paymentMethod == 'binance') methodTitle = 'Binance (Crypto)';
+    if (paymentMethod == 'bankak') methodTitle = 'بنك الخرطوم (Bankak)';
 
     return '''
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طلب جديد - $name</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.8; color: #333; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); color: white; padding: 40px; text-align: center; }
-        .header h1 { font-size: 32px; margin-bottom: 10px; font-weight: 700; }
-        .header .subtitle { font-size: 18px; opacity: 0.9; margin-bottom: 5px; }
-        .header .timestamp { font-size: 14px; opacity: 0.8; background: rgba(255, 255, 255, 0.1); display: inline-block; padding: 5px 15px; border-radius: 20px; margin-top: 15px; }
-        .content { padding: 40px; }
-        .section { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
-        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .section-title { color: #0f766e; font-size: 22px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #14b8a6; display: flex; align-items: center; gap: 10px; }
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .info-item { background: #f8fafc; padding: 20px; border-radius: 12px; border-right: 5px solid #14b8a6; transition: transform 0.3s ease; }
-        .info-item:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
-        .info-label { font-weight: 600; color: #64748b; margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-        .info-value { font-size: 18px; color: #1e293b; font-weight: 500; }
-        .attachments { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 30px; border-radius: 15px; margin-top: 20px; }
-        .attachment-list { list-style: none; margin-top: 15px; }
-        .attachment-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 10px; border-left: 4px solid #0f766e; display: flex; align-items: center; gap: 15px; }
-        .attachment-icon { color: #0f766e; font-size: 20px; }
-        .footer { background: #f1f5f9; padding: 30px; text-align: center; border-top: 2px solid #e2e8f0; color: #64748b; font-size: 14px; }
-        .footer a { color: #0f766e; text-decoration: none; font-weight: 600; }
-        .badge { display: inline-block; padding: 5px 15px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 10px; }
-        @media (max-width: 600px) {
-            .content { padding: 20px; }
-            .header { padding: 30px 20px; }
-            .info-grid { grid-template-columns: 1fr; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>📋 طلب جديد للدراسة</h1>
-            <div class="subtitle">${AppConfig.emailSenderName}</div>
-            <div class="timestamp">🕒 $dateTime</div>
-        </div>
-        
-        <div class="content">
-            <div class="section">
-                <h2 class="section-title"><span>👤 معلومات الطالب</span></h2>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">📝 الاسم الكامل والملاحظات</div>
-                        <div class="info-value">$name</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">🌍 الجنسية</div>
-                        <div class="info-value">$countryName</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <h2 class="section-title"><span>📞 معلومات التواصل</span></h2>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">💬 واتساب</div>
-                        <div class="info-value">$whatsapp <span class="badge">أساسي</span></div>
-                    </div>
-                    $phoneHtml
-                    $emailHtml
-                </div>
-            </div>
-            
-            <div class="attachments">
-                <h2 class="section-title"><span>📎 المرفقات</span></h2>
-                <ul class="attachment-list">
-                    <li class="attachment-item">
-                        <span class="attachment-icon">📄</span>
-                        <span>${name}_جواز_السفر.jpg <span class="badge">مطلوب</span></span>
-                    </li>
-                    <li class="attachment-item">
-                        <span class="attachment-icon">📷</span>
-                        <span>${name}_صورة_شخصية.jpg <span class="badge">مطلوب</span></span>
-                    </li>
-                    <li class="attachment-item">
-                        <span class="attachment-icon">📄</span>
-                        <span>${name}_شهادة_أمام.jpg <span class="badge">مطلوب</span></span>
-                    </li>
-                    $certificateBackHtml
-                    $pdfFileHtml
-                </ul>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>تم إرسال هذا الطلب تلقائياً من تطبيق <strong>${AppConfig.appName}</strong></p>
-            <p>🕒 وقت الإرسال: $dateTime</p>
-            <p>⚠️ هذه رسالة آلية.</p>
-        </div>
+<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #2ecc71; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #2ecc71; color: white; padding: 20px; text-align: center;">
+        <h2 style="margin: 0;">🎓 طلب معادلة شهادة جديد</h2>
+        <p style="font-size: 14px; margin-top: 5px; opacity: 0.9;">$dateTime</p>
     </div>
-</body>
-</html>
+    <div style="padding: 20px; color: #2c3e50;">
+        <h3 style="border-bottom: 2px solid #2ecc71; padding-bottom: 5px;">👤 بيانات الطالب</h3>
+        <p><b>اسم الطالب:</b> $studentName</p>
+        <p><b>اسم الأم:</b> $motherName</p>
+        <p><b>واتساب:</b> $whatsapp</p>
+        
+        <h3 style="border-bottom: 2px solid #f39c12; padding-bottom: 5px; margin-top: 20px;">💰 تفاصيل الدفع</h3>
+        <p><b>طريقة الدفع:</b> $methodTitle</p>
+        <p><b>معلومات المعاملة:</b> $transactionInfo</p>
+    </div>
+    <div style="background-color: #fff3cd; color: #856404; padding: 15px; text-align: center; font-size: 13px; border-top: 1px solid #ffeeba;">
+        ⚠️ <b>تنبيه:</b> يرجى مراجعة إيصال الدفع المرفق قبل البدء في الإجراءات.
+    </div>
+</div>
 ''';
   }
 }
 
-// ✅ تم تصحيح الدالة هنا لتستخدم الأقواس {} لكل المتغيرات
+// دالة Wrapper للتوافق مع الأكواد القديمة في المشروع
 Future<void> sendEmail({
   required String name,
   File? pdfFile,
@@ -265,10 +214,6 @@ Future<void> sendEmail({
   String? email,
   String? country,
 }) async {
-  if (whatsapp.isEmpty) {
-    throw Exception('رقم الواتساب مطلوب');
-  }
-
   await EmailService.sendEmail(
     name: name,
     passport: passport,

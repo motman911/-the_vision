@@ -38,10 +38,18 @@ class _CostCalculatorPageState extends State<CostCalculatorPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(isArabic ? 'حاسبة التكاليف التقديرية' : 'Cost Estimator'),
+        // ✅ إصلاح الألوان: النص أبيض
+        title: Text(
+          isArabic ? 'حاسبة التكاليف التقديرية' : 'Cost Estimator',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: theme.primaryColor,
         elevation: 0,
+        // ✅ إصلاح الألوان: الأيقونة بيضاء
         leading: IconButton(
           icon: Icon(
             isArabic ? Icons.arrow_back_ios : Icons.arrow_back_ios_new,
@@ -67,21 +75,35 @@ class _CostCalculatorPageState extends State<CostCalculatorPage> {
               decoration: BoxDecoration(
                 color: theme.cardColor,
                 borderRadius: BorderRadius.circular(16),
+                // ignore: deprecated_member_use
                 border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.primaryColor.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<UniversityModel>(
                   value: _selectedUniversity,
-                  hint: Text(isArabic ? 'اختر الجامعة' : 'Select University'),
+                  hint: Text(
+                    isArabic ? 'اختر الجامعة' : 'Select University',
+                    style: TextStyle(color: theme.subTextColor),
+                  ),
                   isExpanded: true,
                   icon: Icon(Icons.arrow_drop_down_circle,
                       color: theme.primaryColor),
+                  dropdownColor: theme.cardColor,
                   items: UniversitiesData.allUniversities.map((uni) {
                     return DropdownMenuItem(
                       value: uni,
                       child: Text(
                         uni.getName(isArabic),
-                        style: TextStyle(color: theme.textColor),
+                        style: TextStyle(
+                            color: theme.textColor,
+                            fontWeight: FontWeight.w600),
                       ),
                     );
                   }).toList(),
@@ -92,12 +114,11 @@ class _CostCalculatorPageState extends State<CostCalculatorPage> {
                       _tuitionFees = 0;
                     });
                   },
-                  dropdownColor: theme.cardColor,
                 ),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // عرض التخصصات كـ Chips (أزرار صغيرة) بدلاً من القائمة المنسدلة
             if (_selectedUniversity != null) ...[

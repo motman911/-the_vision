@@ -143,12 +143,12 @@ class FormValidators {
     }
     if (value.length < minLength) {
       return isArabic
-          ? '$fieldName قصير جداً (${minLength} أحرف على الأقل)'
+          ? '$fieldName قصير جداً ($minLength أحرف على الأقل)'
           : '$fieldName is too short (minimum $minLength characters)';
     }
     if (value.length > maxLength) {
       return isArabic
-          ? '$fieldName طويل جداً (${maxLength} أحرف كحد أقصى)'
+          ? '$fieldName طويل جداً ($maxLength أحرف كحد أقصى)'
           : '$fieldName is too long (maximum $maxLength characters)';
     }
     return null;

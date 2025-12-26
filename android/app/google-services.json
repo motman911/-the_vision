@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "27514508108",
+    "project_id": "the-vision-228fc",
+    "storage_bucket": "the-vision-228fc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:27514508108:android:126c0c410bf725e1d5f5e9",
+        "android_client_info": {
+          "package_name": "com.sks.vision"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "27514508108-1f4s8fd8vap515ut773av5164fitl2r6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sks.vision",
+            "certificate_hash": "2f0c018a47476f8ab599bf8f9ab73d0f1e9377a1"
+          }
+        },
+        {
+          "client_id": "27514508108-d1msrujrfehec2h4n77m0gj25nb1htod.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3O8oKgZgPq7dYM8i6ssPhUbH823x9kLs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "27514508108-d1msrujrfehec2h4n77m0gj25nb1htod.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "27514508108-8n7n66nbk1bga00q7hqjv5s24p4vt6vl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sks.vision"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

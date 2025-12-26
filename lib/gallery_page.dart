@@ -31,15 +31,27 @@ class _GalleryPageState extends State<GalleryPage> {
     // 2. تعريف الصور مع تصنيفاتها (بيانات تجريبية)
     final List<Map<String, dynamic>> allImages = [
       {'path': 'assets/images/ULK_P3.jpg', 'cat': 1}, // الجامعات
-      {'path': 'assets/images/In_Rwanda_1.jpg', 'cat': 2}, // الطبيعة
-      {'path': 'assets/images/In_Rwanda_2.jpg', 'cat': 4}, // الحياة العامة
-      {'path': 'assets/images/UR_P1.jpg', 'cat': 1}, // الجامعات
-      {'path': 'assets/images/In_Rwanda_3.jpg', 'cat': 3}, // السكن
-      {'path': 'assets/images/In_Rwanda_4.jpg', 'cat': 2}, // الطبيعة
-      {'path': 'assets/images/MKU_P4.jpg', 'cat': 1}, // الجامعات
-      {'path': 'assets/images/In_Rwanda_5.jpg', 'cat': 4}, // الحياة العامة
-      {'path': 'assets/images/In_Rwanda_6.jpg', 'cat': 2}, // الطبيعة
       {'path': 'assets/images/UoK_P1.jpg', 'cat': 1}, // الجامعات
+      {'path': 'assets/images/UNLAK_P1.jpg', 'cat': 1}, // الجامعات
+      {'path': 'assets/images/UNLAK_P2.jpg', 'cat': 1}, // الجامعات
+      {'path': 'assets/images/INES_P4.jpg', 'cat': 1}, // الجامعات
+      {'path': 'assets/images/Nature_1.jpg', 'cat': 2}, // الطبيعة
+      {'path': 'assets/images/Nature_2.jpg', 'cat': 2}, // الطبيعة
+      {'path': 'assets/images/Nature_3.jpg', 'cat': 2}, // الطبيعة
+      {'path': 'assets/images/Nature_4.jpg', 'cat': 2}, // الطبيعة
+      {'path': 'assets/images/In_Rwanda_9.jpg', 'cat': 2}, // الطبيعة
+      {'path': 'assets/images/In_Rwanda_19.jpg', 'cat': 2}, // الطبيعة
+      {'path': 'assets/images/In_Rwanda_2.jpg', 'cat': 4}, // الحياة العامة
+      {'path': 'assets/images/HOSTELS_1.jpg', 'cat': 3}, // السكن
+      {'path': 'assets/images/HOSTELS_2.jpg', 'cat': 3}, // السكن
+      {'path': 'assets/images/In_Rwanda_3.jpg', 'cat': 4}, // الحياة العامة
+      {'path': 'assets/images/In_Rwanda_4.jpg', 'cat': 4}, // الحياة العامة
+      {'path': 'assets/images/In_Rwanda_7.jpg', 'cat': 4}, // الحياة العامة
+      {'path': 'assets/images/In_Rwanda_10.jpg', 'cat': 4}, // الحياة العامة
+      {'path': 'assets/images/In_Rwanda_11.jpg', 'cat': 4}, // الحياة العامة
+      {'path': 'assets/images/In_Rwanda_12.jpg', 'cat': 4}, // الحياة العامة
+      {'path': 'assets/images/In_Rwanda_13.jpg', 'cat': 4}, // الحياة العامة
+      {'path': 'assets/images/In_Rwanda_14.jpg', 'cat': 4}, // الحياة العامة
     ];
 
     // 3. تصفية الصور حسب الفئة المختارة
@@ -50,7 +62,13 @@ class _GalleryPageState extends State<GalleryPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(lang.gallery),
+        title: Text(
+          lang.gallery,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: theme.primaryColor,
         elevation: 0,
@@ -133,7 +151,7 @@ class _GalleryPageState extends State<GalleryPage> {
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
-                      childAspectRatio: 0.85, // جعل الصور أطول قليلاً
+                      childAspectRatio: 0.85,
                     ),
                     itemCount: displayImages.length,
                     itemBuilder: (context, index) {
@@ -153,14 +171,14 @@ class _GalleryPageState extends State<GalleryPage> {
                           );
                         },
                         child: Hero(
-                          tag: imagePath, // استخدام المسار كـ Tag لضمان التميز
+                          // ✅ الحل هنا: إضافة الـ index للتاج لجعله فريداً
+                          tag: '${imagePath}_$index',
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: theme.primaryColor
-                                      .withOpacity(0.15), // ظل ملون
+                                  color: theme.primaryColor.withOpacity(0.15),
                                   blurRadius: 10,
                                   offset: const Offset(0, 5),
                                 ),
@@ -170,7 +188,6 @@ class _GalleryPageState extends State<GalleryPage> {
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            // تدرج لوني خفيف في الأسفل
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
@@ -197,7 +214,7 @@ class _GalleryPageState extends State<GalleryPage> {
   }
 }
 
-// عارض الصور بملء الشاشة (محسن)
+// عارض الصور بملء الشاشة
 class FullScreenGallery extends StatefulWidget {
   final List<String> images;
   final int initialIndex;
@@ -236,8 +253,9 @@ class _FullScreenGalleryState extends State<FullScreenGallery> {
                 initialScale: PhotoViewComputedScale.contained,
                 minScale: PhotoViewComputedScale.contained,
                 maxScale: PhotoViewComputedScale.covered * 2.5,
-                heroAttributes:
-                    PhotoViewHeroAttributes(tag: widget.images[index]),
+                // ✅ الحل هنا أيضاً: يجب أن يطابق التاج الموجود في الصفحة السابقة
+                heroAttributes: PhotoViewHeroAttributes(
+                    tag: '${widget.images[index]}_$index'),
               );
             },
             itemCount: widget.images.length,
@@ -255,7 +273,7 @@ class _FullScreenGalleryState extends State<FullScreenGallery> {
             },
           ),
 
-          // زر الإغلاق في الأعلى
+          // زر الإغلاق
           Positioned(
             top: 40,
             right: 20,
@@ -265,7 +283,7 @@ class _FullScreenGalleryState extends State<FullScreenGallery> {
             ),
           ),
 
-          // مؤشر الرقم في الأسفل
+          // مؤشر الرقم
           Positioned(
             bottom: 30,
             child: Container(

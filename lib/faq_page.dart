@@ -18,7 +18,14 @@ class FAQPage extends StatelessWidget {
         return Scaffold(
           backgroundColor: themeProvider.scaffoldBackgroundColor,
           appBar: AppBar(
-            title: Text(languageProvider.faq),
+            // ✅ التعديل هنا: تثبيت اللون الأبيض للنص
+            title: Text(
+              languageProvider.faq,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
             centerTitle: true,
             backgroundColor: themeProvider.primaryColor,
             elevation: 0,
@@ -27,7 +34,7 @@ class FAQPage extends StatelessWidget {
                 languageProvider.isArabic
                     ? Icons.arrow_back_ios
                     : Icons.arrow_back_ios_new,
-                color: Colors.white,
+                color: Colors.white, // ✅ الأيقونة بيضاء
               ),
               onPressed: () => Navigator.pop(context),
             ),

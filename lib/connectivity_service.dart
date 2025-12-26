@@ -10,7 +10,7 @@ class ConnectivityService {
     }
   }
 
-  static Stream<ConnectivityResult> get connectionStream {
+  static Stream<List<ConnectivityResult>> get connectionStream {
     return Connectivity().onConnectivityChanged;
   }
 

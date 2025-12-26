@@ -5,12 +5,11 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 
-// ✅ تأكد أن هذه الاستيرادات موجودة وصحيحة
 import 'favorites_provider.dart';
 import 'theme_provider.dart';
 import 'l10n/language_provider.dart';
 import 'contact_page.dart';
-import 'data/universities_data.dart'; // ✅ هنا يوجد تعريف UniversityModel
+import 'data/universities_data.dart';
 
 class UniversitiesPage extends StatefulWidget {
   const UniversitiesPage({super.key});
@@ -64,79 +63,108 @@ class _UniversitiesPageState extends State<UniversitiesPage> {
       builder: (context, themeProvider, languageProvider, child) {
         return Scaffold(
           backgroundColor: themeProvider.scaffoldBackgroundColor,
-          appBar: AppBar(
-            title: Text(languageProvider.famousUniversities),
-            backgroundColor: themeProvider.primaryColor,
-            centerTitle: true,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(
-                languageProvider.isArabic
-                    ? Icons.arrow_back_ios
-                    : Icons.arrow_back_ios_new,
-                color: Colors.white,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
+          // ❌ لا يوجد AppBar، نستخدم Custom Header
           body: Column(
             children: [
-              // Search Bar
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
-                decoration: BoxDecoration(
-                  color: themeProvider.primaryColor,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(50),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
+              // ✅ تصميم الهيدر الجديد مع شريط البحث المدمج
+              Stack(
+                children: [
+                  // الخلفية الملونة للهيدر
+                  Container(
+                    height: 160, // زيادة الارتفاع قليلاً لاستيعاب العناصر
+                    decoration: BoxDecoration(
+                      color: themeProvider.primaryColor,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30),
                       ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (value) =>
-                        _runFilter(value, languageProvider.isArabic),
-                    style: const TextStyle(color: Colors.black87),
-                    decoration: InputDecoration(
-                      hintText: languageProvider.isArabic
-                          ? 'ابحث عن جامعة أو تخصص...'
-                          : 'Search university or major...',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      prefixIcon:
-                          Icon(Icons.search, color: themeProvider.primaryColor),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, color: Colors.grey),
-                              onPressed: () {
-                                _searchController.clear();
-                                _runFilter('', languageProvider.isArabic);
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: themeProvider.primaryColor.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
                   ),
-                ),
+
+                  // محتوى الهيدر
+                  SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 12),
+                          // العنوان الرئيسي
+                          Text(
+                            languageProvider.universities,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // شريط البحث
+                          Container(
+                            decoration: BoxDecoration(
+                              color: themeProvider.cardColor,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (value) =>
+                                  _runFilter(value, languageProvider.isArabic),
+                              style: TextStyle(color: themeProvider.textColor),
+                              decoration: InputDecoration(
+                                hintText: languageProvider.isArabic
+                                    ? 'ابحث عن جامعة، تخصص...'
+                                    : 'Search university, major...',
+                                hintStyle: TextStyle(
+                                    color: themeProvider.subTextColor),
+                                prefixIcon: Icon(Icons.search,
+                                    color: themeProvider.primaryColor),
+                                suffixIcon: _searchController.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear,
+                                            color: Colors.grey),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          _runFilter(
+                                              '', languageProvider.isArabic);
+                                        },
+                                      )
+                                    : null,
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 10),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
+
               const SizedBox(height: 10),
-              // List
+
+              // قائمة الجامعات
               Expanded(
                 child: _filteredUniversities.isNotEmpty
                     ? ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.only(
+                            top: 10, left: 16, right: 16, bottom: 80),
                         itemCount: _filteredUniversities.length,
                         itemBuilder: (context, index) {
                           return UniversityCard(
@@ -160,7 +188,7 @@ class _UniversitiesPageState extends State<UniversitiesPage> {
                                   ? 'لا توجد نتائج مطابقة'
                                   : 'No results found',
                               style: TextStyle(
-                                  color: Colors.grey[600],
+                                  color: themeProvider.subTextColor,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold),
                             ),
@@ -242,7 +270,6 @@ class _UniversityCardState extends State<UniversityCard> {
     final specialties =
         widget.uniModel.getSpecialties(widget.languageProvider.isArabic);
 
-    // ✅ استخدام البروفايدر بشكل صحيح
     final favoritesProvider = Provider.of<FavoritesProvider>(context);
     final isFav = favoritesProvider.isFavorite(widget.uniModel.id);
 

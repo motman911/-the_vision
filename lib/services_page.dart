@@ -1,6 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'contact_page.dart';
+import 'equivalence_page.dart';
 import 'theme_provider.dart';
 import 'l10n/language_provider.dart';
 import 'widgets.dart';
@@ -15,77 +18,155 @@ class ServicesPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: themeProvider.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(languageProvider.services),
-        centerTitle: true,
-        backgroundColor: themeProvider.primaryColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            languageProvider.isArabic
-                ? Icons.arrow_back_ios
-                : Icons.arrow_back_ios_new,
-            color: Colors.white,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      // ❌ لا يوجد AppBar هنا لأنه موجود في HomeScreen
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // 1. خدمات التقديم (أزرق)
+            // ✅ كرت خدمة المعادلة (الأكثر أهمية)
+            _buildEquivalenceCard(context, themeProvider, languageProvider),
+            const SizedBox(height: 20),
+
+            // 1. خدمات التقديم
             _buildServiceCard(
               context,
               languageProvider.applyServices,
               languageProvider.isArabic
                   ? 'استشارة أكاديمية، اختيار التخصص والجامعة، تجهيز المستندات، متابعة القبول'
-                  : 'Academic consultation, choosing major and university, document preparation, follow-up acceptance',
-              Icons.description_outlined,
-              const Color(0xFF3B82F6), // Blue
+                  : 'Academic consultation, major & university selection, document preparation',
+              Icons.school,
+              Colors.blue,
               themeProvider,
               languageProvider,
             ),
 
-            // 2. خدمات ما بعد القبول (برتقالي)
+            // 2. ما بعد القبول
             _buildServiceCard(
               context,
               languageProvider.afterAcceptance,
               languageProvider.isArabic
                   ? 'استقبال من المطار، تأمين السكن، استخراج شريحة اتصال، المساعدة في الإقامة'
-                  : 'Airport pickup, securing accommodation, obtaining SIM card, assistance with residency',
-              Icons.home_work_outlined,
+                  : 'Airport pickup, accommodation, SIM card, residency assistance',
+              Icons.flight_land,
               const Color(0xFFF59E0B), // Orange
               themeProvider,
               languageProvider,
             ),
 
-            // 3. دعم الطالب (أخضر)
+            // 3. دعم الطلاب
             _buildServiceCard(
               context,
               languageProvider.studentSupport,
               languageProvider.isArabic
                   ? 'متابعة الطالب خلال فترة الدراسة، حل المشاكل الأكاديمية والإدارية'
-                  : 'Following up with the student during the study period, solving academic and administrative problems',
-              Icons.school_outlined,
+                  : 'Ongoing student support, solving academic & administrative issues',
+              Icons.groups,
               const Color(0xFF10B981), // Green
               themeProvider,
               languageProvider,
             ),
 
             const SizedBox(height: 24),
+
+            // خطوات التقديم
             _buildProcessSteps(themeProvider, languageProvider),
 
             const SizedBox(height: 24),
+
+            // تكاليف المعيشة
             _buildLivingCosts(themeProvider, languageProvider),
 
             const SizedBox(height: 24),
+
+            // المستندات المطلوبة
             _buildRequiredDocuments(themeProvider, languageProvider),
 
             const SizedBox(height: 30),
+
+            // زر الواتساب
             const Center(child: WhatsAppButton()),
-            const SizedBox(height: 30),
+
+            const SizedBox(height: 80), // مساحة سفلية
           ],
+        ),
+      ),
+    );
+  }
+
+  // --- المكونات (Widgets) ---
+
+  Widget _buildEquivalenceCard(
+      BuildContext context, ThemeProvider theme, LanguageProvider lang) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [theme.primaryColor, theme.secondaryColor],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: theme.primaryColor.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const EquivalencePage()),
+            );
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.verified_user,
+                      color: Colors.white, size: 30),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        lang.equivalenceRequest,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        lang.isArabic
+                            ? 'ابدأ إجراءات معادلة شهادتك الآن'
+                            : 'Start your certificate equivalence now',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios,
+                    color: Colors.white, size: 18),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -100,7 +181,6 @@ class ServicesPage extends StatelessWidget {
     ThemeProvider theme,
     LanguageProvider lang,
   ) {
-    // جلب المميزات بناءً على العنوان
     final features = _getServiceFeatures(title, lang);
 
     return Container(
@@ -110,7 +190,7 @@ class ServicesPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.15), // ✅ ظل ملون بلون الخدمة
+            color: color.withOpacity(0.15),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -120,6 +200,7 @@ class ServicesPage extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
+            // نمرر اسم الخدمة كاهتمام أولي لصفحة التواصل
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -171,12 +252,9 @@ class ServicesPage extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 16),
                 Divider(color: Colors.grey.withOpacity(0.1)),
                 const SizedBox(height: 8),
-
-                // قائمة المميزات
                 ...features.map(
                   (feature) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
@@ -198,10 +276,7 @@ class ServicesPage extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
-                // زر الطلب
                 Container(
                   width: double.infinity,
                   height: 45,
@@ -244,8 +319,6 @@ class ServicesPage extends StatelessWidget {
       ),
     );
   }
-
-  // --- دوال المساعدة ---
 
   List<String> _getServiceFeatures(String serviceType, LanguageProvider lang) {
     if (serviceType == lang.applyServices) {
@@ -486,7 +559,7 @@ class ServicesPage extends StatelessWidget {
               Icon(Icons.folder_special, color: Colors.orange[600]),
               const SizedBox(width: 8),
               Text(
-                lang.isArabic ? 'المستندات المطلوبة' : 'Required Documents',
+                lang.reqDocs,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -496,17 +569,19 @@ class ServicesPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _docItem('شهادة الثانوية (مترجمة)', 'High school certificate', theme,
-              lang),
-          _docItem('صورة جواز السفر', 'Passport copy', theme, lang),
-          _docItem('صور شخصية', 'Personal photos', theme, lang),
+          _docItem(
+              lang.isArabic
+                  ? 'شهادة الثانوية (مترجمة)'
+                  : 'High school certificate',
+              theme),
+          _docItem(lang.isArabic ? 'صورة جواز السفر' : 'Passport copy', theme),
+          _docItem(lang.isArabic ? 'صور شخصية' : 'Personal photos', theme),
         ],
       ),
     );
   }
 
-  Widget _docItem(
-      String ar, String en, ThemeProvider theme, LanguageProvider lang) {
+  Widget _docItem(String text, ThemeProvider theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -521,7 +596,7 @@ class ServicesPage extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            lang.isArabic ? ar : en,
+            text,
             style: TextStyle(color: theme.textColor, fontSize: 15),
           ),
         ],

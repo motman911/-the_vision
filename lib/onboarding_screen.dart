@@ -2,7 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart'; // تأكد من استيراد هذا الباكيج
 import 'home_screen.dart';
 import 'theme_provider.dart';
 import 'l10n/language_provider.dart';
@@ -15,14 +17,14 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _pageController = PageController();
+  final PageController _controller = PageController();
   int _currentIndex = 0;
 
-  // قائمة محتوى الصفحات
+  // قائمة محتوى الصفحات (بالنصوص التي طلبتها)
   List<Map<String, dynamic>> _getPages(LanguageProvider lang) {
     return [
       {
-        'image': 'assets/images/The_Vision_P2.jpg', // صورة ملهمة
+        'image': 'assets/images/In_Rwanda_15.jpg', // تأكد من وجود الصورة
         'title': lang.isArabic
             ? 'مرحباً بك في مكتب الرؤية'
             : 'Welcome to The Vision',
@@ -32,7 +34,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         'icon': Icons.school_outlined,
       },
       {
-        'image': 'assets/images/In_Rwanda_1.jpg', // صورة لطبيعة رواندا
+        'image': 'assets/images/UNLAK_P2.jpg',
         'title': lang.isArabic ? 'خدمات متكاملة' : 'Full Services',
         'desc': lang.isArabic
             ? 'من الاستشارة الأكاديمية، القبول الجامعي، وحتى الاستقبال في المطار وتأمين السكن.'
@@ -40,7 +42,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         'icon': Icons.volunteer_activism_outlined,
       },
       {
-        // تأكد من وجود هذه الصورة أو استبدلها بصورة أخرى متاحة مثل In_Rwanda_2.jpg
         'image': 'assets/images/In_Rwanda_2.jpg',
         'title': lang.isArabic ? 'ابدأ رحلتك الآن' : 'Start Your Journey',
         'desc': lang.isArabic
@@ -52,13 +53,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _finishOnboarding() async {
-    // حفظ أن المستخدم شاهد الشاشة
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('seen_onboarding', true); // ✅ نفس المفتاح في Splash
+    await prefs.setBool('seen_onboarding', true);
 
     if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
   }
@@ -68,117 +67,107 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final theme = Provider.of<ThemeProvider>(context);
     final lang = Provider.of<LanguageProvider>(context);
     final pages = _getPages(lang);
+    bool isLastPage = _currentIndex == pages.length - 1;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // خلفية PageView
+          // 1. عارض الصفحات
           PageView.builder(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() => _currentIndex = index);
-            },
+            controller: _controller,
+            onPageChanged: (index) => setState(() => _currentIndex = index),
             itemCount: pages.length,
             itemBuilder: (context, index) {
-              return _buildPage(pages[index], theme);
+              return _buildPageContent(pages[index], theme);
             },
           ),
 
-          // زر التخطي (في الأعلى مع SafeArea)
+          // 2. زر التخطي (في الأعلى)
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Row(
-                  mainAxisAlignment: lang.isArabic
-                      ? MainAxisAlignment.start
-                      : MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: _finishOnboarding,
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.black12, // خلفية خفيفة للوضوح
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                      ),
-                      child: Text(
-                        lang.isArabic ? 'تخطي' : 'Skip',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
+            top: 50,
+            right: lang.isArabic ? null : 20,
+            left: lang.isArabic ? 20 : null,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: isLastPage ? 0.0 : 1.0, // إخفاء في آخر صفحة
+              child: TextButton(
+                onPressed: _finishOnboarding,
+                style: TextButton.styleFrom(
+                  backgroundColor:
+                      Colors.black.withOpacity(0.1), // خلفية خفيفة للوضوح
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                ),
+                child: Text(
+                  lang.isArabic ? 'تخطي' : 'Skip',
+                  style: GoogleFonts.tajawal(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),
           ),
 
-          // المؤشرات والأزرار (في الأسفل)
+          // 3. المنطقة السفلية (المؤشر والأزرار)
           Positioned(
             bottom: 40,
             left: 20,
             right: 20,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // نقاط المؤشر
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    pages.length,
-                    (index) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      height: 8,
-                      width: _currentIndex == index ? 24 : 8,
-                      decoration: BoxDecoration(
-                        color: _currentIndex == index
-                            ? theme.primaryColor
-                            : Colors.grey.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                // المؤشر (Indicator)
+                SmoothPageIndicator(
+                  controller: _controller,
+                  count: pages.length,
+                  effect: ExpandingDotsEffect(
+                    spacing: 8,
+                    radius: 4,
+                    dotWidth: 10,
+                    dotHeight: 8,
+                    dotColor: Colors.white.withOpacity(0.5),
+                    activeDotColor: theme.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 30),
 
-                // زر التالي / ابدأ
+                // الزر الرئيسي
                 SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (_currentIndex == pages.length - 1) {
+                      if (isLastPage) {
                         _finishOnboarding();
                       } else {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
+                        _controller.nextPage(
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.easeInOutCubic,
                         );
                       }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 20,
+                      shadowColor: theme.primaryColor.withOpacity(0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 5,
                     ),
                     child: Text(
-                      _currentIndex == pages.length - 1
+                      isLastPage
                           ? (lang.isArabic ? 'ابدأ الآن' : 'Get Started')
                           : (lang.isArabic ? 'التالي' : 'Next'),
-                      style: const TextStyle(
+                      style: GoogleFonts.tajawal(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -191,72 +180,98 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildPage(Map<String, dynamic> data, ThemeProvider theme) {
+  Widget _buildPageContent(Map<String, dynamic> data, ThemeProvider theme) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1. الصورة الخلفية
+        // الخلفية (صورة كاملة)
+        // الخلفية (صورة كاملة)
         Image.asset(
           data['image'],
-          fit: BoxFit.cover,
-          errorBuilder: (c, o, s) =>
-              Container(color: Colors.grey), // لون احتياطي
+          fit: BoxFit.cover, // يفضل تركه cover عشان الصورة تغطي الشاشة
+
+          alignment: const Alignment(0.5, 0.0),
+
+          errorBuilder: (context, error, stackTrace) {
+            return Container(color: Colors.grey.shade300);
+          },
         ),
 
-        // 2. طبقة تظليل (Gradient) عشان النص يظهر بوضوح
+        // تدرج لوني (Gradient) ليجعل النص مقروءاً
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.1), // شفاف فوق
-                Colors.black.withOpacity(0.6), // وسط
-                theme
-                    .scaffoldBackgroundColor, // لون الخلفية تحت (عشان يندمج مع النصوص)
+                Colors.black.withOpacity(0.1), // خفيف جداً في الأعلى
+                Colors.black.withOpacity(0.5), // متوسط
+                theme.scaffoldBackgroundColor
+                    .withOpacity(1.0), // غامق في الأسفل
+                theme.scaffoldBackgroundColor, // صلب في النهاية
               ],
-              stops: const [0.0, 0.6, 1.0],
+              stops: const [0.0, 0.4, 0.8, 1.0],
             ),
           ),
         ),
 
-        // 3. المحتوى النصي
+        // المحتوى (أيقونة ونصوص)
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.end, // النصوص تحت
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              // الأيقونة داخل دائرة متوهجة
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(0.1),
+                  color: theme.primaryColor.withOpacity(0.15),
                   shape: BoxShape.circle,
-                  border:
-                      Border.all(color: theme.primaryColor.withOpacity(0.3)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.primaryColor.withOpacity(0.2),
+                      blurRadius: 30,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: theme.primaryColor.withOpacity(0.5),
+                    width: 2,
+                  ),
                 ),
-                child: Icon(data['icon'], size: 40, color: theme.primaryColor),
+                child: Icon(
+                  data['icon'],
+                  size: 40,
+                  color: theme.primaryColor,
+                ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
+
+              // العنوان
               Text(
                 data['title'],
-                style: TextStyle(
-                  fontSize: 26,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.tajawal(
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: theme.textColor,
+                  height: 1.2,
                 ),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
+
+              // الوصف
               Text(
                 data['desc'],
-                style: TextStyle(
-                  fontSize: 16,
-                  color: theme.textColor.withOpacity(0.8),
-                  height: 1.5,
-                ),
                 textAlign: TextAlign.center,
+                style: GoogleFonts.tajawal(
+                  fontSize: 16,
+                  color: theme.subTextColor.withOpacity(0.9),
+                  height: 1.6,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              const SizedBox(height: 120), // مساحة للأزرار السفلية
+              const SizedBox(height: 140), // مساحة فارغة للأزرار السفلية
             ],
           ),
         ),
